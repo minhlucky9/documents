@@ -24,16 +24,78 @@ Le mécanisme visuel correspond au schéma suivant: un stimulus externe provoque
 
 ### 1.1.2. Modèles locaux
 
-Depuis des années, la synthèse d'images s'applique à définir des modèles de réflexion simulant le plus fidèlement possible la réponse d'un matériau quelconque à une incidence lumineuse. Cependant, l'interaction entre la lumière et la matière est un problème très difficile à modéliser parfaitement en raison de sa complexité. Maintenant, cette interaction est appliquée à de nombreux objectifs tels que la simulation physique ou le rendu temps réel. Et un des techniques qu'on utilise souvent pour ce calcul est le modèle de BRDF.
+Depuis des années, la synthèse d'images s'applique à définir des modèles de réflexion simulant le plus fidèlement possible la réponse d'un matériau quelconque à une incidence lumineuse. Cependant, l'interaction entre la lumière et la matière est un problème très difficile à modéliser parfaitement en raison de sa complexité. Maintenant, cette interaction est appliquée à de nombreux objectifs tels que la simulation physique ou le rendu temps réel. Et un des techniques qu'on utilise souvent pour ce calcul est la fonction de BRDF.
 
 #### 1.1.2.1. Définition de la BRDF
 
+<p style="text-align: center">
+  <img src="images/BRDF.png" style="display:block; margin: auto">
+  <br>
+  Figure 2: Le modèle de BRDF
+</p>
 
+La luminance est une mesure radiométrique définissant la qualité d'énergie, dans notre cas l'énergie lumineuse, qui est émise ou reçue par une surface élémentaire dans un angle solide élémentaire autour d'une direction donnée. La luminance s'exprime en Watts par unité d'aire et par unité d'angle solide $W.m^{-2}.sr^{-1}$. L'énergie qui arrive sur une portion de surface dans une portion d'angle solide *$dω_i$*:
+
+$$dL_i(x, ω_i) = L_i(x, ω_i) cos(\vec{N_x}, ω_i) dω_i$$ 
+
+avec:
+
++ $L_i(x, ω_i)$ est l'énergie reçcue en x
++ $ω_i$ est la direction d'éclairement
++ $\vec{N_x}$ est la normale de surface
++ $dω_i$ est l'angle solide
+
+
+La fonction de distribution de la réflectance bidirectionnelle (BRDF) décrit la réflextion d'une onde lumineuse sur une surface. En effet, pour une direction d'éclairement *$ω_i$* et une direction de réflexion *$ω_r$*, la BRDF est le rapport de la luminance réflechie en un point *x* d'une surface infinitésimale d'aire *dA* à l'éclairement incident à celle-ci.
+
+$$f_r(x, ω_i, ω_r, λ) = f_r(x, θ_i, Φ_i, θ_r, Φ_r, λ) = \frac{dL_r(x,θ_r, Φ_r, λ)}{dL_i(x, θ_i, Φ_i, λ)} = \frac{dL_r(x,θ_r, Φ_r, λ)}{L_i(x, θ_i, Φ_i, λ) cosθ_i dω_i}$$
+
+avec:
+
++ $θ_i$ est l'angle entre $ω_i$ et $\vec{N_x}$
++ $θ_r$ est l'angle entre $ω_r$ et $\vec{N_x}$
+
+#### 1.1.2.2. Le modèle de Lambert
+
+<p style="text-align: center">
+  <img src="images/Lambert6.gif" style="display:block; margin: auto">
+  <br>
+  Figure 3: Lambertian reflectance
+</p>
+
+Le modèle de Lambert, qui suppose une surface parfaitement diffuse. C'est-à-dire que la lumière est réflechie de façon équiprobable par le matériau dans toutes les directions. La BRDF est donc constante et indépendante des directions d'éclairement, de réflexion, et de la longueur d'onde:
+
+$$f_r(ω_i,ω_r) = \frac{1}{π}$$
+
+En réalité, les surfaces ne réflechissent qu'une partie de la lumière (l'autre étant absorbée). C'est pourquoi on utilise parfois le modèle suivantpour caractériser une surface dite Lambertienne:
+
+$$f_r(ω_i,ω_r) = \frac{C}{π}$$
+
+avec:\
+$C$ est le longueur d'onde de la lumière 
+
+#### 1.1.2.3. Les autres fonctions de BxDF
+
+À côté de la fonction BRDF, il existe aussi des autres fonctions qui s'adaptent aux différents type de matériaux, tels ques:
+
++ *Bidirectional Transmittance Distribution Function (BTDF):* Le cas où la lumière est réfracté complètement
+
++ *Bidirectional Scattering Distribution Function (BSDF):* Le cas où une partie de la lumière est diffusée tandis que l'autre est réfracté.
+
++ *Bidirectional Sous-Surfaque Reflectance Distribution Function (BSSRDF):* Le cas où la lumière est diffusée sous la surface d'un matériel (la peau).
 
 ### 1.1.3. Modèles globaux
+
+Dans la section avant, on a vu le modèle qui permet de calculer l'éclairement d'une surface de manière locale, c'est-à-dire sans prendre en compte la participation de l'ensemble des objets constituant une scène dans l'apparence d'un seul objet. En effet, elle ne prennent en compte que la réflexion directe des sources de lumières, alors que la lumière peut subir plusieurs réflexions avant d'atteindre un objet.
+
 ## 1.2. Photon Mapping
 ### 1.2.1. Photon Tracing
+
+
+
 ### 1.2.2. Photon Collecting
+
+
 
 # II. Implémentation 
 
@@ -46,3 +108,4 @@ Depuis des années, la synthèse d'images s'applique à définir des modèles de
 
 # Reférences
 * Bernard Péroche, Dominique Bechmann. Informatique garaphique et rendu. Lavoisier, 2007.
+* Schill, Steven & Jensen, John & Raber, George & Porter, Dwayne. (2004). Temporal Modeling of Bidirectional Reflection Distribution Function (BRDF) in Coastal Vegetation. GIScience & Remote Sensing. 41. 116-135. 10.2747/1548-1603.41.2.116. 

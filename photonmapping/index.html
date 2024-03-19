@@ -11,9 +11,46 @@
 <h4 id="le-mécanisme-visuel">1.1.1.2. Le mécanisme visuel</h4>
 <p>Le mécanisme visuel correspond au schéma suivant: un stimulus externe provoque l’activation d’un cône ou d’un bâtonnet qui produit une transition photochimique, laquelle induit de l’influx nerveux. Les impulsions nerveuses fournis par les cônes sont recombinées en trois nouveaux canaux: le premier indique la luminance, le deuxième la différence entre le rouge et le vert et le troisième la différence entre le jaune et le bleu.</p>
 <h3 id="modèles-locaux">1.1.2. Modèles locaux</h3>
-<p>Depuis des années, la synthèse d’images s’applique à définir des modèles de réflexion simulant le plus fidèlement possible la réponse d’un matériau quelconque à une incidence lumineuse. Cependant, l’interaction entre la lumière et la matière est un problème très difficile à modéliser parfaitement en raison de sa complexité. Maintenant, cette interaction est appliquée à de nombreux objectifs tels que la simulation physique ou le rendu temps réel. Et un des techniques qu’on utilise souvent pour ce calcul est le modèle de BRDF.</p>
+<p>Depuis des années, la synthèse d’images s’applique à définir des modèles de réflexion simulant le plus fidèlement possible la réponse d’un matériau quelconque à une incidence lumineuse. Cependant, l’interaction entre la lumière et la matière est un problème très difficile à modéliser parfaitement en raison de sa complexité. Maintenant, cette interaction est appliquée à de nombreux objectifs tels que la simulation physique ou le rendu temps réel. Et un des techniques qu’on utilise souvent pour ce calcul est la fonction de BRDF.</p>
 <h4 id="définition-de-la-brdf">1.1.2.1. Définition de la BRDF</h4>
+<p style="text-align: center">
+<img src="images/BRDF.png" style="display:block; margin: auto"> <br> Figure 2: Le modèle de BRDF
+</p>
+<p>La luminance est une mesure radiométrique définissant la qualité d’énergie, dans notre cas l’énergie lumineuse, qui est émise ou reçue par une surface élémentaire dans un angle solide élémentaire autour d’une direction donnée. La luminance s’exprime en Watts par unité d’aire et par unité d’angle solide <span class="math inline"><em>W</em>.<em>m</em><sup> − 2</sup>.<em>s</em><em>r</em><sup> − 1</sup></span>. L’énergie qui arrive sur une portion de surface dans une portion d’angle solide <em><span class="math inline"><em>d</em><em>ω</em><sub><em>i</em></sub></span></em>:</p>
+<p><br /><span class="math display">$$dL_i(x, ω_i) = L_i(x, ω_i) cos(\vec{N_x}, ω_i) dω_i$$</span><br /></p>
+<p>avec:</p>
+<ul>
+<li><span class="math inline"><em>L</em><sub><em>i</em></sub>(<em>x</em>, <em>ω</em><sub><em>i</em></sub>)</span> est l’énergie reçcue en x</li>
+<li><span class="math inline"><em>ω</em><sub><em>i</em></sub></span> est la direction d’éclairement</li>
+<li><span class="math inline">$\vec{N_x}$</span> est la normale de surface</li>
+<li><span class="math inline"><em>d</em><em>ω</em><sub><em>i</em></sub></span> est l’angle solide</li>
+</ul>
+<p>La fonction de distribution de la réflectance bidirectionnelle (BRDF) décrit la réflextion d’une onde lumineuse sur une surface. En effet, pour une direction d’éclairement <em><span class="math inline"><em>ω</em><sub><em>i</em></sub></span></em> et une direction de réflexion <em><span class="math inline"><em>ω</em><sub><em>r</em></sub></span></em>, la BRDF est le rapport de la luminance réflechie en un point <em>x</em> d’une surface infinitésimale d’aire <em>dA</em> à l’éclairement incident à celle-ci.</p>
+<p><br /><span class="math display">$$f_r(x, ω_i, ω_r, λ) = f_r(x, θ_i, Φ_i, θ_r, Φ_r, λ) = \frac{dL_r(x,θ_r, Φ_r, λ)}{dL_i(x, θ_i, Φ_i, λ)} = \frac{dL_r(x,θ_r, Φ_r, λ)}{L_i(x, θ_i, Φ_i, λ) cosθ_i dω_i}$$</span><br /></p>
+<p>avec:</p>
+<ul>
+<li><span class="math inline"><em>θ</em><sub><em>i</em></sub></span> est l’angle entre <span class="math inline"><em>ω</em><sub><em>i</em></sub></span> et <span class="math inline">$\vec{N_x}$</span></li>
+<li><span class="math inline"><em>θ</em><sub><em>r</em></sub></span> est l’angle entre <span class="math inline"><em>ω</em><sub><em>r</em></sub></span> et <span class="math inline">$\vec{N_x}$</span></li>
+</ul>
+<h4 id="le-modèle-de-lambert">1.1.2.2. Le modèle de Lambert</h4>
+<p style="text-align: center">
+<img src="images/Lambert6.gif" style="display:block; margin: auto"> <br> Figure 3: Lambertian reflectance
+</p>
+<p>Le modèle de Lambert, qui suppose une surface parfaitement diffuse. C’est-à-dire que la lumière est réflechie de façon équiprobable par le matériau dans toutes les directions. La BRDF est donc constante et indépendante des directions d’éclairement, de réflexion, et de la longueur d’onde:</p>
+<p><br /><span class="math display">$$f_r(ω_i,ω_r) = \frac{1}{π}$$</span><br /></p>
+<p>En réalité, les surfaces ne réflechissent qu’une partie de la lumière (l’autre étant absorbée). C’est pourquoi on utilise parfois le modèle suivantpour caractériser une surface dite Lambertienne:</p>
+<p><br /><span class="math display">$$f_r(ω_i,ω_r) = \frac{C}{π}$$</span><br /></p>
+<p>avec:<br />
+<span class="math inline"><em>C</em></span> est le longueur d’onde de la lumière</p>
+<h4 id="les-autres-fonctions-de-bxdf">1.1.2.3. Les autres fonctions de BxDF</h4>
+<p>À côté de la fonction BRDF, il existe aussi des autres fonctions qui s’adaptent aux différents type de matériaux, tels ques:</p>
+<ul>
+<li><p><em>Bidirectional Transmittance Distribution Function (BTDF):</em> Le cas où la lumière est réfracté complètement</p></li>
+<li><p><em>Bidirectional Scattering Distribution Function (BSDF):</em> Le cas où une partie de la lumière est diffusée tandis que l’autre est réfracté.</p></li>
+<li><p><em>Bidirectional Sous-Surfaque Reflectance Distribution Function (BSSRDF):</em> Le cas où la lumière est diffusée sous la surface d’un matériel (la peau).</p></li>
+</ul>
 <h3 id="modèles-globaux">1.1.3. Modèles globaux</h3>
+<p>Dans la section avant, on a vu le modèle qui permet de calculer l’éclairement d’une surface de manière locale, c’est-à-dire sans prendre en compte la participation de l’ensemble des objets constituant une scène dans l’apparence d’un seul objet. En effet, elle ne prennent en compte que la réflexion directe des sources de lumières, alors que la lumière peut subir plusieurs réflexions avant d’atteindre un objet.</p>
 <h2 id="photon-mapping">1.2. Photon Mapping</h2>
 <h3 id="photon-tracing">1.2.1. Photon Tracing</h3>
 <h3 id="photon-collecting">1.2.2. Photon Collecting</h3>
@@ -27,4 +64,5 @@
 <h1 id="reférences">Reférences</h1>
 <ul>
 <li>Bernard Péroche, Dominique Bechmann. Informatique garaphique et rendu. Lavoisier, 2007.</li>
+<li>Schill, Steven &amp; Jensen, John &amp; Raber, George &amp; Porter, Dwayne. (2004). Temporal Modeling of Bidirectional Reflection Distribution Function (BRDF) in Coastal Vegetation. GIScience &amp; Remote Sensing. 41. 116-135. 10.2747/1548-1603.41.2.116.</li>
 </ul>
