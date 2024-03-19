@@ -19,10 +19,17 @@ La figure 1 présente une coupe de l'oeil humain. L'iris joue le rôle du diaphr
 Il existe trois type de cônes, qui diffèrent suivant leur sensibilité aux longueurs d'ondes: certains sont sensibles aux courtes longueurs d'ondes (cônes bleus), les autres ont une sensibilité maximale à 535 nm (cônes verts) ou à 575 nm (cônes rouges).
 
 #### 1.1.1.2. Le mécanisme visuel
+
 Le mécanisme visuel correspond au schéma suivant: un stimulus externe provoque l'activation d'un cône ou d'un bâtonnet qui produit une transition photochimique, laquelle induit de l'influx nerveux. Les impulsions nerveuses fournis par les cônes sont recombinées en trois nouveaux canaux: le premier indique la luminance, le deuxième la différence entre le rouge et le vert et le troisième la différence entre le jaune et le bleu.
 
 ### 1.1.2. Modèles locaux
-Depuis des années, 
+
+Depuis des années, la synthèse d'images s'applique à définir des modèles de réflexion simulant le plus fidèlement possible la réponse d'un matériau quelconque à une incidence lumineuse. Cependant, l'interaction entre la lumière et la matière est un problème très difficile à modéliser parfaitement en raison de sa complexité. Maintenant, cette interaction est appliquée à de nombreux objectifs tels que la simulation physique ou le rendu temps réel. Et un des techniques qu'on utilise souvent pour ce calcul est le modèle de BRDF.
+
+#### 1.1.2.1. Définition de la BRDF
+
+
+
 ### 1.1.3. Modèles globaux
 ## 1.2. Photon Mapping
 ### 1.2.1. Photon Tracing
