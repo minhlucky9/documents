@@ -2,8 +2,11 @@
 
 ## 1.1. Modèles d'éclairement
 La couleur est une phénomène qui dépend, d'une part, de la physique de la lumière et son interaction avec les matériaux, d'autre part, de l'interprétation des phénomènes résultats par le système visuel humain.
+
 ### 1.1.1. La système visuelle d'humain
+
 #### 1.1.1.1. L'oeil humain
+
 <p style="text-align: center">
   <img src="images/eye.png" style="display:block; margin: auto">
   <br>
