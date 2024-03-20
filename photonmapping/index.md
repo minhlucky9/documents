@@ -155,7 +155,13 @@ Ci-dessous, ce sont des valeurs de PDF qui corresponds quelques cas d'échantill
   Figure 5: La phase de Photon Collecting
 </p>
 
+Après d'obtenir la carte de photon, on va l'utiliser pour faire le rendu d'image. Pour chaque pixel d'image, on va lancer un rayon à partir de caméra, puis calculer le point d'intersection *x* entre ce rayon et tous les objets dans la scène. Si S est la surface qui contiens *x* et $p_i$ est la position du $i^{me}$ photon d'énergie $\phi_i$, l'énergie reçue en Watts est: 
 
+$$E = \sum_{p_i \in S }\phi_i$$
+
+ou, en Watts par mètre carré, avec A est l'aire de la surface S:
+
+$$ I = \frac{1}{A}\sum_{p_i \in S }\phi_i$$
 
 # II. Implémentation 
 
