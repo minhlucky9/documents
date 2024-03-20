@@ -8,7 +8,7 @@ La couleur est une phénomène qui dépend, d'une part, de la physique de la lum
 #### 1.1.1.1. L'oeil humain
 
 <p style="text-align: center">
-  <img src="images/eye.png" style="display:block; margin: auto">
+  <img src="images/eye.png" width=300  style="display:block; margin: auto">
   <br>
   Figure 1: Coupe de l'oeil humain
 </p>
@@ -29,47 +29,47 @@ Depuis des années, la synthèse d'images s'applique à définir des modèles de
 #### 1.1.2.1. Définition de la BRDF
 
 <p style="text-align: center">
-  <img src="images/BRDF.png" style="display:block; margin: auto">
+  <img src="images/BRDF.png" width=300  style="display:block; margin: auto">
   <br>
   Figure 2: Le modèle de BRDF
 </p>
 
-La luminance est une mesure radiométrique définissant la qualité d'énergie, dans notre cas l'énergie lumineuse, qui est émise ou reçue par une surface élémentaire dans un angle solide élémentaire autour d'une direction donnée. La luminance s'exprime en Watts par unité d'aire et par unité d'angle solide $W.m^{-2}.sr^{-1}$. L'énergie qui arrive sur une portion de surface dans une portion d'angle solide *$dω_i$*:
+La luminance est une mesure radiométrique définissant la qualité d'énergie, dans notre cas l'énergie lumineuse, qui est émise ou reçue par une surface élémentaire dans un angle solide élémentaire autour d'une direction donnée. La luminance s'exprime en Watts par unité d'aire et par unité d'angle solide $W.m^{-2}.sr^{-1}$. L'énergie qui arrive sur une portion de surface dans une portion d'angle solide *$d\omega_i$*:
 
-$$dL_i(x, ω_i) = L_i(x, ω_i) cos(\vec{N_x}, ω_i) dω_i$$ 
+$$dL_i(x, \omega_i) = L_i(x, \omega_i) cos(\vec{N_x}, \omega_i) d\omega_i$$ 
 
 avec:
 
-+ $L_i(x, ω_i)$ est l'énergie reçcue en x
-+ $ω_i$ est la direction d'éclairement
++ $L_i(x, \omega_i)$ est l'énergie reçcue en x
++ $\omega_i$ est la direction d'éclairement
 + $\vec{N_x}$ est la normale de surface
-+ $dω_i$ est l'angle solide
++ $d\omega_i$ est l'angle solide
 
 
-La fonction de distribution de la réflectance bidirectionnelle (BRDF) décrit la réflextion d'une onde lumineuse sur une surface. En effet, pour une direction d'éclairement *$ω_i$* et une direction de réflexion *$ω_r$*, la BRDF est le rapport de la luminance réflechie en un point *x* d'une surface infinitésimale d'aire *dA* à l'éclairement incident à celle-ci.
+La fonction de distribution de la réflectance bidirectionnelle (BRDF) décrit la réflextion d'une onde lumineuse sur une surface. En effet, pour une direction d'éclairement *$\omega_i$* et une direction de réflexion *$\omega_r$*, la BRDF est le rapport de la luminance réflechie en un point *x* d'une surface infinitésimale d'aire *dA* à l'éclairement incident à celle-ci.
 
-$$f_r(x, ω_i, ω_r, λ) = f_r(x, θ_i, Φ_i, θ_r, Φ_r, λ) = \frac{dL_r(x,θ_r, Φ_r, λ)}{dL_i(x, θ_i, Φ_i, λ)} = \frac{dL_r(x,θ_r, Φ_r, λ)}{L_i(x, θ_i, Φ_i, λ) cosθ_i dω_i}$$
+$$f_r(x, \omega_i, \omega_r, \lambda) = f_r(x, \theta_i, \phi_i, \theta_r, \phi_r, \lambda) = \frac{dL_r(x,\theta_r, \phi_r, \lambda)}{dL_i(x, \theta_i, \phi_i, \lambda)} = \frac{dL_r(x,\theta_r, \phi_r, \lambda)}{L_i(x, \theta_i, \phi_i, \lambda) cos\theta_i d\omega_i}$$
 
 avec:
 
-+ $θ_i$ est l'angle entre $ω_i$ et $\vec{N_x}$
-+ $θ_r$ est l'angle entre $ω_r$ et $\vec{N_x}$
++ $\theta_i$ est l'angle entre $\omega_i$ et $\vec{N_x}$
++ $\theta_r$ est l'angle entre $\omega_r$ et $\vec{N_x}$
 
 #### 1.1.2.2. Le modèle de Lambert
 
 <p style="text-align: center">
-  <img src="images/Lambert6.gif" style="display:block; margin: auto">
+  <img src="images/Lambert6.gif" width=300 style="display:block; margin: auto;">
   <br>
   Figure 3: Lambertian reflectance
 </p>
 
 Le modèle de Lambert, qui suppose une surface parfaitement diffuse. C'est-à-dire que la lumière est réflechie de façon équiprobable par le matériau dans toutes les directions. La BRDF est donc constante et indépendante des directions d'éclairement, de réflexion, et de la longueur d'onde:
 
-$$f_r(ω_i,ω_r) = \frac{1}{π}$$
+$$f_r(\omega_i,\omega_r) = \frac{1}{\pi}$$
 
 En réalité, les surfaces ne réflechissent qu'une partie de la lumière (l'autre étant absorbée). C'est pourquoi on utilise parfois le modèle suivantpour caractériser une surface dite Lambertienne:
 
-$$f_r(ω_i,ω_r) = \frac{C}{π}$$
+$$f_r(\omega_i,\omega_r) = \frac{C}{\pi}$$
 
 avec:\
 $C$ est le longueur d'onde de la lumière 
@@ -86,7 +86,33 @@ $C$ est le longueur d'onde de la lumière
 
 ### 1.1.3. Modèles globaux
 
-Dans la section avant, on a vu le modèle qui permet de calculer l'éclairement d'une surface de manière locale, c'est-à-dire sans prendre en compte la participation de l'ensemble des objets constituant une scène dans l'apparence d'un seul objet. En effet, elle ne prennent en compte que la réflexion directe des sources de lumières, alors que la lumière peut subir plusieurs réflexions avant d'atteindre un objet.
+Dans la section avant, on a vu le modèle qui permet de calculer l'éclairement d'une surface de manière locale, c'est-à-dire sans prendre en compte la participation de l'ensemble des objets constituant une scène dans l'apparence d'un seul objet. En effet, elle ne prennent en compte que la réflexion directe des sources de lumières, alors que la lumière peut subir plusieurs réflexions avant d'atteindre un objet. 
+
+*L'équation de rendu*
+
+L'expression de la lumière $L(x \rightarrow \omega)$ émise en une point *x* d'une surface et dans une direction $\omega$ est répresenté par:
+
+$$ L (x \rightarrow \omega) = L_e(x \rightarrow \omega) + L_r(x \rightarrow \omega)  $$
+
+avec:
+* $L_e(x \rightarrow \omega)$ est la luminance propre émise (comme pour une source de lumière)
+* $L_r(x \rightarrow \omega)$ est la réflexion de toute la lumière qui arrive sur cette surface
+
+On sait que la réflexion est contrôlée par la fonction BRDF: 
+
+$$ f_r (x, \omega \rightarrow \omega') = \frac{L_r(x \rightarrow \omega)}{L(x \leftarrow \omega')|cos(\vec{N_x}, \omega')|d\omega'}  $$
+
+avec:
+* $\omega$ est la direction de réflexion
+* $\omega'$ est la direction d'éclarement
+* $\vec{N_x}$ est la normale de surface
+* $L_r(x \rightarrow \omega)$ est la réflexion de toute la lumière qui arrive sur cette surface
+* $L(x \leftarrow \omega')$ est la luminance reçue dans la direction $\omega$'
+
+On a l'équation de rendu au final:
+
+$$ L (x \rightarrow \omega) = L_e(x \rightarrow \omega) + \int_{\Omega} f_r (x, \omega \rightarrow \omega')L(x \leftarrow \omega')|cos(\vec{N_x}, \omega')|d\omega'   $$
+
 
 ## 1.2. Photon Mapping
 ### 1.2.1. Photon Tracing
