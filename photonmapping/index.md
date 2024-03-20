@@ -115,11 +115,45 @@ $$ L (x \rightarrow \omega) = L_e(x \rightarrow \omega) + \int_{\Omega} f_r (x, 
 
 
 ## 1.2. Photon Mapping
+
+Le Photon Mapping est la méthode utilisé beaucoup dans les simulations d'interception de la lumière. Il y a deux phases principales dans cette technique, ce sont:
+* *Photon Tracing:* Construire la carte de photon
+* *Photon Collecting:* Estimer l'énergie lumineuse de chaque pixel d'image
+
 ### 1.2.1. Photon Tracing
 
+<p style="text-align: center">
+  <img src="images/photon_tracing.png" width=400 style="display:block; margin: auto;">
+  <br>
+  Figure 4: La phase de Photon Tracing
+</p>
+
+Afin de cosntruire la carte de photon, on va lancer plusieurs rayons à partir des sources de lumières et stocker des impacts de chaque rélfexions, ainsi que leurs énergie $\phi$ en Watts (W). Ces impacts sont les *photons* dans notre carte de photon. Si l'émission de N échantillons est guidée par la densité de probabilité $p(x, \omega)$, l'énergie de chaque photon est calculer par cette équation:
+
+$$ \phi = \frac{L(x \rightarrow \omega) |cos(\vec{N_x}, \omega)|}{Np(x,\omega)} $$
+
+avec:
+* $N$ est le nombre d'échantions
+* $L(x \rightarrow \omega)$ est l'énergie reçue en *x*
+* $\vec{N_x}$ est la normale du surface 
+* $\omega$ est la direction d'éclairement
+* $p(x, \omega)$ est la densité de probabilité (PDF)
+
+Ci-dessous, ce sont des valeurs de PDF qui corresponds quelques cas d'échantillonage:
+
+* Échantillonnage d'une direction uniforme sur une sphère-unité centrée : $p(\omega) = 1/(4\pi)$
+* Échantillonnage d'une direction uniforme sur une demi sphère-unité centrée : $p(\omega) = 1/(2\pi)$
+* Échantillonnage d'une direction selon le cosinus à la normale : $p(\omega) = |cos(\vec{N}, \omega)|/\pi$
+* Échantillonnage d'une direction uniforme d'un triangle d'aire A : $p(\omega) = 1/A$
 
 
 ### 1.2.2. Photon Collecting
+
+<p style="text-align: center">
+  <img src="images/photon_colect.gif" width=400 style="display:block; margin: auto;">
+  <br>
+  Figure 5: La phase de Photon Collecting
+</p>
 
 
 
