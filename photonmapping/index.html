@@ -4,7 +4,7 @@
 <h3 id="la-système-visuelle-dhumain">1.1.1. La système visuelle d’humain</h3>
 <h4 id="loeil-humain">1.1.1.1. L’oeil humain</h4>
 <p style="text-align: center">
-<img src="images/eye.png" style="display:block; margin: auto"> <br> Figure 1: Coupe de l’oeil humain
+<img src="images/eye.png" width=400  style="display:block; margin: auto"> <br> Figure 1: Coupe de l’oeil humain
 </p>
 <p>La figure 1 présente une coupe de l’oeil humain. L’iris joue le rôle du diaphragme de l’appareil photographique et la pupille celui de la lentile. L’image se forme sur la rétine qui est la surface de l’oeil sensible à la lumière. Sur la rétine, il existe deux types de cellules photo céceptrices qui transforment la lumière en impulsions nerveuses: les cônes et les bâtonnets. Les bâtonnets sont plus sensibles à la lumière que les cônes et permettent la vision nocturne. Les cônes servent à la vision des couleurs et à la vision diurne.</p>
 <p>Il existe trois type de cônes, qui diffèrent suivant leur sensibilité aux longueurs d’ondes: certains sont sensibles aux courtes longueurs d’ondes (cônes bleus), les autres ont une sensibilité maximale à 535 nm (cônes verts) ou à 575 nm (cônes rouges).</p>
@@ -14,10 +14,10 @@
 <p>Depuis des années, la synthèse d’images s’applique à définir des modèles de réflexion simulant le plus fidèlement possible la réponse d’un matériau quelconque à une incidence lumineuse. Cependant, l’interaction entre la lumière et la matière est un problème très difficile à modéliser parfaitement en raison de sa complexité. Maintenant, cette interaction est appliquée à de nombreux objectifs tels que la simulation physique ou le rendu temps réel. Et un des techniques qu’on utilise souvent pour ce calcul est la fonction de BRDF.</p>
 <h4 id="définition-de-la-brdf">1.1.2.1. Définition de la BRDF</h4>
 <p style="text-align: center">
-<img src="images/BRDF.png" style="display:block; margin: auto"> <br> Figure 2: Le modèle de BRDF
+<img src="images/BRDF.png" width=400  style="display:block; margin: auto"> <br> Figure 2: Le modèle de BRDF
 </p>
 <p>La luminance est une mesure radiométrique définissant la qualité d’énergie, dans notre cas l’énergie lumineuse, qui est émise ou reçue par une surface élémentaire dans un angle solide élémentaire autour d’une direction donnée. La luminance s’exprime en Watts par unité d’aire et par unité d’angle solide <span class="math inline"><em>W</em>.<em>m</em><sup> − 2</sup>.<em>s</em><em>r</em><sup> − 1</sup></span>. L’énergie qui arrive sur une portion de surface dans une portion d’angle solide <em><span class="math inline"><em>d</em><em>ω</em><sub><em>i</em></sub></span></em>:</p>
-<p><br /><span class="math display">$$dL_i(x, ω_i) = L_i(x, ω_i) cos(\vec{N_x}, ω_i) dω_i$$</span><br /></p>
+<p><br /><span class="math display">$$dL_i(x, \omega_i) = L_i(x, \omega_i) cos(\vec{N_x}, \omega_i) d\omega_i$$</span><br /></p>
 <p>avec:</p>
 <ul>
 <li><span class="math inline"><em>L</em><sub><em>i</em></sub>(<em>x</em>, <em>ω</em><sub><em>i</em></sub>)</span> est l’énergie reçcue en x</li>
@@ -26,7 +26,7 @@
 <li><span class="math inline"><em>d</em><em>ω</em><sub><em>i</em></sub></span> est l’angle solide</li>
 </ul>
 <p>La fonction de distribution de la réflectance bidirectionnelle (BRDF) décrit la réflextion d’une onde lumineuse sur une surface. En effet, pour une direction d’éclairement <em><span class="math inline"><em>ω</em><sub><em>i</em></sub></span></em> et une direction de réflexion <em><span class="math inline"><em>ω</em><sub><em>r</em></sub></span></em>, la BRDF est le rapport de la luminance réflechie en un point <em>x</em> d’une surface infinitésimale d’aire <em>dA</em> à l’éclairement incident à celle-ci.</p>
-<p><br /><span class="math display">$$f_r(x, ω_i, ω_r, λ) = f_r(x, θ_i, Φ_i, θ_r, Φ_r, λ) = \frac{dL_r(x,θ_r, Φ_r, λ)}{dL_i(x, θ_i, Φ_i, λ)} = \frac{dL_r(x,θ_r, Φ_r, λ)}{L_i(x, θ_i, Φ_i, λ) cosθ_i dω_i}$$</span><br /></p>
+<p><br /><span class="math display">$$f_r(x, \omega_i, \omega_r, \lambda) = f_r(x, \theta_i, \phi_i, \theta_r, \phi_r, \lambda) = \frac{dL_r(x,\theta_r, \phi_r, \lambda)}{dL_i(x, \theta_i, \phi_i, \lambda)} = \frac{dL_r(x,\theta_r, \phi_r, \lambda)}{L_i(x, \theta_i, \phi_i, \lambda) cos\theta_i d\omega_i}$$</span><br /></p>
 <p>avec:</p>
 <ul>
 <li><span class="math inline"><em>θ</em><sub><em>i</em></sub></span> est l’angle entre <span class="math inline"><em>ω</em><sub><em>i</em></sub></span> et <span class="math inline">$\vec{N_x}$</span></li>
@@ -34,12 +34,12 @@
 </ul>
 <h4 id="le-modèle-de-lambert">1.1.2.2. Le modèle de Lambert</h4>
 <p style="text-align: center">
-<img src="images/Lambert6.gif" style="display:block; margin: auto"> <br> Figure 3: Lambertian reflectance
+<img src="images/Lambert6.gif" width=400 style="display:block; margin: auto;"> <br> Figure 3: Lambertian reflectance
 </p>
 <p>Le modèle de Lambert, qui suppose une surface parfaitement diffuse. C’est-à-dire que la lumière est réflechie de façon équiprobable par le matériau dans toutes les directions. La BRDF est donc constante et indépendante des directions d’éclairement, de réflexion, et de la longueur d’onde:</p>
-<p><br /><span class="math display">$$f_r(ω_i,ω_r) = \frac{1}{π}$$</span><br /></p>
+<p><br /><span class="math display">$$f_r(\omega_i,\omega_r) = \frac{1}{\pi}$$</span><br /></p>
 <p>En réalité, les surfaces ne réflechissent qu’une partie de la lumière (l’autre étant absorbée). C’est pourquoi on utilise parfois le modèle suivantpour caractériser une surface dite Lambertienne:</p>
-<p><br /><span class="math display">$$f_r(ω_i,ω_r) = \frac{C}{π}$$</span><br /></p>
+<p><br /><span class="math display">$$f_r(\omega_i,\omega_r) = \frac{C}{\pi}$$</span><br /></p>
 <p>avec:<br />
 <span class="math inline"><em>C</em></span> est le longueur d’onde de la lumière</p>
 <h4 id="les-autres-fonctions-de-bxdf">1.1.2.3. Les autres fonctions de BxDF</h4>
@@ -51,9 +51,39 @@
 </ul>
 <h3 id="modèles-globaux">1.1.3. Modèles globaux</h3>
 <p>Dans la section avant, on a vu le modèle qui permet de calculer l’éclairement d’une surface de manière locale, c’est-à-dire sans prendre en compte la participation de l’ensemble des objets constituant une scène dans l’apparence d’un seul objet. En effet, elle ne prennent en compte que la réflexion directe des sources de lumières, alors que la lumière peut subir plusieurs réflexions avant d’atteindre un objet.</p>
+<p><em>L’équation de rendu</em></p>
+<p>L’expression de la lumière <span class="math inline"><em>L</em>(<em>x</em> → <em>ω</em>)</span> émise en une point <em>x</em> d’une surface et dans une direction <span class="math inline"><em>ω</em></span> est répresenté par:</p>
+<p><br /><span class="math display"><em>L</em>(<em>x</em> → <em>ω</em>) = <em>L</em><sub><em>e</em></sub>(<em>x</em> → <em>ω</em>) + <em>L</em><sub><em>r</em></sub>(<em>x</em> → <em>ω</em>)</span><br /></p>
+<p>avec: * <span class="math inline"><em>L</em><sub><em>e</em></sub>(<em>x</em> → <em>ω</em>)</span> est la luminance propre émise (comme pour une source de lumière) * <span class="math inline"><em>L</em><sub><em>r</em></sub>(<em>x</em> → <em>ω</em>)</span> est la réflexion de toute la lumière qui arrive sur cette surface</p>
+<p>On sait que la réflexion est contrôlée par la fonction BRDF:</p>
+<p><br /><span class="math display">$$ f_r (x, \omega \rightarrow \omega') = \frac{L_r(x \rightarrow \omega)}{L(x \leftarrow \omega')|cos(\vec{N_x}, \omega')|d\omega'}  $$</span><br /></p>
+<p>avec: * <span class="math inline"><em>ω</em></span> est la direction de réflexion * <span class="math inline"><em>ω</em>′</span> est la direction d’éclarement * <span class="math inline">$\vec{N_x}$</span> est la normale de surface * <span class="math inline"><em>L</em><sub><em>r</em></sub>(<em>x</em> → <em>ω</em>)</span> est la réflexion de toute la lumière qui arrive sur cette surface * <span class="math inline"><em>L</em>(<em>x</em> ← <em>ω</em>′)</span> est la luminance reçue dans la direction <span class="math inline"><em>ω</em></span>’</p>
+<p>On a l’équation de rendu au final:</p>
+<p><br /><span class="math display">$$ L (x \rightarrow \omega) = L_e(x \rightarrow \omega) + \int_{\Omega} f_r (x, \omega \rightarrow \omega')L(x \leftarrow \omega')|cos(\vec{N_x}, \omega')|d\omega'   $$</span><br /></p>
 <h2 id="photon-mapping">1.2. Photon Mapping</h2>
+<p>Le Photon Mapping est la méthode utilisé beaucoup dans les simulations d’interception de la lumière. Il y a deux phases principales dans cette technique, ce sont: * <em>Photon Tracing:</em> Construire la carte de photon * <em>Photon Collecting:</em> Estimer l’énergie lumineuse de chaque pixel d’image</p>
 <h3 id="photon-tracing">1.2.1. Photon Tracing</h3>
+<p style="text-align: center">
+<img src="images/photon_tracing.png" width=400 style="display:block; margin: auto;"> <br> Figure 4: La phase de Photon Tracing
+</p>
+<p>Afin de cosntruire la carte de photon, on va lancer plusieurs rayons à partir des sources de lumières et stocker des impacts de chaque rélfexions, ainsi que leurs énergie <span class="math inline"><em>ϕ</em></span> en Watts (W). Ces impacts sont les <em>photons</em> dans notre carte de photon. Si l’émission de N échantillons est guidée par la densité de probabilité <span class="math inline"><em>p</em>(<em>x</em>, <em>ω</em>)</span>, l’énergie de chaque photon est calculer par cette équation:</p>
+<p><br /><span class="math display">$$ \phi = \frac{L(x \rightarrow \omega) |cos(\vec{N_x}, \omega)|}{Np(x,\omega)} $$</span><br /></p>
+<p>avec: * <span class="math inline"><em>N</em></span> est le nombre d’échantions * <span class="math inline"><em>L</em>(<em>x</em> → <em>ω</em>)</span> est l’énergie reçue en <em>x</em> * <span class="math inline">$\vec{N_x}$</span> est la normale du surface * <span class="math inline"><em>ω</em></span> est la direction d’éclairement * <span class="math inline"><em>p</em>(<em>x</em>, <em>ω</em>)</span> est la densité de probabilité (PDF)</p>
+<p>Ci-dessous, ce sont des valeurs de PDF qui corresponds quelques cas d’échantillonage:</p>
+<ul>
+<li>Échantillonnage d’une direction uniforme sur une sphère-unité centrée : <span class="math inline"><em>p</em>(<em>ω</em>) = 1/(4<em>π</em>)</span></li>
+<li>Échantillonnage d’une direction uniforme sur une demi sphère-unité centrée : <span class="math inline"><em>p</em>(<em>ω</em>) = 1/(2<em>π</em>)</span></li>
+<li>Échantillonnage d’une direction selon le cosinus à la normale : <span class="math inline"><em>p</em>(<em>ω</em>) = |<em>c</em><em>o</em><em>s</em>(<em>N⃗</em>, <em>ω</em>)|/<em>π</em></span></li>
+<li>Échantillonnage d’une direction uniforme d’un triangle d’aire A : <span class="math inline"><em>p</em>(<em>ω</em>) = 1/<em>A</em></span></li>
+</ul>
 <h3 id="photon-collecting">1.2.2. Photon Collecting</h3>
+<p style="text-align: center">
+<img src="images/photon_colect.gif" width=400 style="display:block; margin: auto;"> <br> Figure 5: La phase de Photon Collecting
+</p>
+<p>Après d’obtenir la carte de photon, on va l’utiliser pour faire le rendu d’image. Pour chaque pixel d’image, on va lancer un rayon à partir de caméra, puis calculer le point d’intersection <em>x</em> entre ce rayon et tous les objets dans la scène. Si S est la surface qui contiens <em>x</em> et <span class="math inline"><em>p</em><sub><em>i</em></sub></span> est la position du <span class="math inline"><em>i</em><sup><em>m</em><em>e</em></sup></span> photon d’énergie <span class="math inline"><em>ϕ</em><sub><em>i</em></sub></span>, l’énergie reçue en Watts est:</p>
+<p><br /><span class="math display"><em>E</em> = ∑<sub><em>p</em><sub><em>i</em></sub> ∈ <em>S</em></sub><em>ϕ</em><sub><em>i</em></sub></span><br /></p>
+<p>ou, en Watts par mètre carré, avec A est l’aire de la surface S:</p>
+<p><br /><span class="math display">$$ I = \frac{1}{A}\sum_{p_i \in S }\phi_i$$</span><br /></p>
 <h1 id="ii.-implémentation">II. Implémentation</h1>
 <h2 id="matériel">2.1. Matériel</h2>
 <h2 id="lumière">2.2. Lumière</h2>
