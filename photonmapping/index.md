@@ -8,7 +8,7 @@ La couleur est une phénomène qui dépend, d'une part, de la physique de la lum
 #### 1.1.1.1. L'oeil humain
 
 <p style="text-align: center">
-  <img src="images/eye.png" width=300  style="display:block; margin: auto">
+  <img src="images/eye.png" width=400  style="display:block; margin: auto">
   <br>
   Figure 1: Coupe de l'oeil humain
 </p>
@@ -29,7 +29,7 @@ Depuis des années, la synthèse d'images s'applique à définir des modèles de
 #### 1.1.2.1. Définition de la BRDF
 
 <p style="text-align: center">
-  <img src="images/BRDF.png" width=300  style="display:block; margin: auto">
+  <img src="images/BRDF.png" width=400  style="display:block; margin: auto">
   <br>
   Figure 2: Le modèle de BRDF
 </p>
@@ -58,7 +58,7 @@ avec:
 #### 1.1.2.2. Le modèle de Lambert
 
 <p style="text-align: center">
-  <img src="images/Lambert6.gif" width=300 style="display:block; margin: auto;">
+  <img src="images/Lambert6.gif" width=400 style="display:block; margin: auto;">
   <br>
   Figure 3: Lambertian reflectance
 </p>
