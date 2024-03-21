@@ -165,13 +165,484 @@ $$ I = \frac{1}{A}\sum_{p_i \in S }\phi_i$$
 
 # II. Implémentation 
 
+Tous les codes d'implémentation est trouvé sur le Github de Aurélien Besnier dans la lien suivant : https://github.com/AurelienBesnier/photon_mapping 
+
 ## 2.1. Matériel
+
+Avant d'implémenter des différents type de matériels, il faut d'implémenter la classe BxDF qui contiens des méthodes de calculer la réflexion de la lumière. Ensuite, toutes les classes de matériels vont héritées cette classe. Maintenant, dans notre projet, on a déjà défini 3 types de BxDF, ce sont:
+* **Diffuse :** La réflexion diffuse est parait sur les surface non polies où la lumière est réfléchie dans plusieurs directions. Il est impossible d'avoir un image claire en observant un objet sur ce type de surface
+* **Specular :** La réflexion spéculaire est une réflexion régulière de la lumière. Contrairement à la réflexion diffuse, elle ne peut exister que si les rayons lumineux rencontrent une surface parfaitement plane ou polie tels ques les miroirs ou une surface d'eau parfaitement calme
+* **Captor :** Ce type de BxDF n'influence pas la calculation de lumière dans la simulation. Il est utilisé seulement pour capturer l'énergie lumineuse dans une région déterminé.   
+
+```cpp
+enum class BxDFType {
+    DIFFUSE, ///< Diffuse surface
+    SPECULAR, ///< Specular surface
+    CAPTOR ///< Captor surface
+};
+```
+Ci-dessous, c'est l'implémentation raccourcie de la classe BxDF. Il contient un constructor, une fonction de calculer le BxDF et une fonction d'échantillonner la direction de réflexion. La version complète de ce code est trouvé ici: https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/material.hpp#L49
+
+```cpp
+class BxDF {
+private:
+    BxDFType type; ///< The type of BxDF.
+
+public:
+    explicit BxDF(const BxDFType &type) : type(type) {}
+
+    // evaluate BxDF
+    virtual Vec3f evaluate(Vec3f &wo, Vec3f &wi,
+                           TransportDirection &transport_dir) const = 0;
+
+    // sample direction by BxDF.
+    // its pdf is proportional to the shape of BxDF
+    virtual Vec3f sampleDirection(Vec3f &wo,
+                                  TransportDirection &transport_dir,
+                                  Sampler &sampler, Vec3f &wi,
+                                  float &pdf) const = 0;
+};
+```
+Dans notre projet, on utilise 4 types de matériels pour construire l'environnement de cette simulation:
+* Lambert
+* Transparent
+* Feuil
+* Captor
+
+### 2.1.1. Matériel de Lambert
+
+Le matériel de Lambert est un type de matériel très basique dans notre projet. Il est utilisé pour répresetner la plupart des objets dans la scène tels ques les murs ou la table. 
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/material.hpp#L123
+
+```cpp
+class Lambert : public BxDF {
+private:
+    Vec3f rho;
+
+public:
+    explicit Lambert(const Vec3f &rho) : BxDF(BxDFType::DIFFUSE), rho(rho) {}
+
+    Vec3f evaluate(Vec3f &wo, Vec3f &wi,
+                   TransportDirection &transport_dir) const override {
+        // when wo, wi is under the surface, return 0
+        const float cosThetaO = cosTheta(wo);
+        const float cosThetaI = cosTheta(wi);
+        if (cosThetaO < 0 || cosThetaI < 0) return {0};
+
+        return rho / PI;
+    }
+
+    Vec3f sampleDirection(Vec3f &wo,
+                          TransportDirection &transport_dir,
+                          Sampler &sampler, Vec3f &wi,
+                          float &pdf) const override {
+        // cosine weighted hemisphere sampling
+        wi = sampleCosineHemisphere(sampler.getNext2D(), pdf);
+
+        return evaluate(wo, wi, transport_dir);
+    }
+};
+```
+
+La densité de probabilité (pdf) dans *la partie 1.2.1* est calculer par ce code:
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/sampler.hpp#L103
+
+```cpp
+inline Vec3f sampleCosineHemisphere(Vec2f uv, float &pdf) {
+    float theta = 0.5f * std::acos(boost::algorithm::clamp(1.0f - 2.0f * uv[0],
+                                                           -1.0f, 1.0f));
+    float phi = PI_MUL_2 * uv[1];
+    float cosTheta = std::cos(theta);
+    pdf = PI_INV * cosTheta;
+    Vec3f cart = sphericalToCartesian(theta, phi);
+    return cart;
+}
+```
+
+### 2.1.2. Matériel de transparence
+
+Comme le matériel de Lambert, le matériel de transparence est aussi un matériel très basique. Il est utilisé pour répresenter les matériaux qui permettent la lumière de traverser tels ques les verres, l'eau, etc.
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/material.hpp#L404
+
+```cpp
+class Transparent : public BxDF {
+private:
+    Vec3f rho;
+    float ior;
+
+public:
+    Transparent(const Vec3f &rho, float ior)
+            : BxDF(BxDFType::DIFFUSE), rho(rho), ior(ior) {}
+
+    // NOTE: delta function
+    Vec3f evaluate(Vec3f &wo, Vec3f &wi,
+                   TransportDirection &transport_dir) const override {
+        const float cosThetaO = cosTheta(wo);
+        const float cosThetaI = cosTheta(wi);
+        if (cosThetaO < 0 || cosThetaI < 0) return {0};
+
+        return rho / PI;
+    }
+
+    Vec3f sampleDirection(Vec3f &wo,
+                          TransportDirection &transport_dir,
+                          Sampler &sampler, Vec3f &wi,
+                          float &pdf) const override {
+        // set appropriate ior, normal
+        float iorO, iorI;
+        Vec3f n;
+        if (wo[1] > 0) {
+            iorO = 1.0f;
+            iorI = ior;
+            n = Vec3f(0, 1, 0);
+        } else {
+            iorO = ior;
+            iorI = 1.0f;
+            n = Vec3f(0, -1, 0);
+        }
+
+        // fresnel reflectance
+        const float fr = fresnelR(dot(wo, n), iorO, iorI);
+
+        // reflection
+        if (sampler.getNext1D() < fr) {
+            wi = reflect(wo, n);
+            pdf = 1.0f;
+
+            //bxdf = 1/(PI * pdf) = 1 / cosTheta
+            return rho / absCosTheta(wi);
+        }
+            // refraction
+        else {
+            Vec3f tr;
+            if (refract(wo, n, iorO, iorI, tr)) {
+                wi = tr;
+                pdf = 1.0f;
+
+                float scaling = 1.0f;
+                if (transport_dir == TransportDirection::FROM_CAMERA) {
+                    scaling = (iorO * iorO) / (iorI * iorI);
+                }
+
+                return scaling * rho / absCosTheta(wi);
+            }
+                // total reflection
+            else {
+                wi = reflect(wo, n);
+                pdf = 1.0f;
+                return rho / absCosTheta(wi);
+            }
+        }
+    }
+
+};
+```
+
+### 2.1.3. Matériel de feuil et de capteur
+
+L'implémentation de ces deux matériaux est pareil que celle de matériel de transparence, sauf que l'ior (index of reflectance) de feuil est 1.425 et l'ior de capteur est 1. 
+
+L'article concernant l'ior de feuil: https://opg.optica.org/ao/abstract.cfm?uri=ao-13-1-109
+
 ## 2.2. Lumière
+
+<p style="text-align: center">
+  <img src="images/lumière.png" style="display:block; margin: auto;">
+  <br>
+  Figure 6: Des types de source de la lumière
+</p>
+
+Dans un moteur de rendu, il existe plusieurs types de sources de la lumière qui va nous donner des résultats différents de rendu en appliquant dans la scène. Afin de simuler ces types de lumière, on va échantillonner des rayons de lumière qui partent de ces sources. Chaque rayon de lumière peut être répresenté par ces facteurs:
+
+* Le point de départ
+* La direction de la lumière
+* L'énergie lumineuse de ce rayon
+
+Ci-dessous, c'est l'implémentation de lumière en général. Il va contenir une variable pour stocker l'énergie totale de cette source, des fonctions pour générer le point de départ ainsi que la direction de rayon.  
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/light.hpp#L23C1-L37C3
+
+```cpp
+class Light {
+public:
+    virtual ~Light() = default;
+
+    /**
+    * @fn Vec3f Le() override
+    * Get the light emission of the light source.
+    * @returns the le attribute.
+    */
+    virtual Vec3f Le() = 0;
+
+    virtual SurfaceInfo samplePoint(Sampler &sampler, float &pdf) = 0;
+
+    virtual Vec3f sampleDirection(const SurfaceInfo &surfInfo, Sampler &sampler, float &pdf) = 0;
+};
+```
+
+Dans cette simulation, on a déjà implémenté 4 types de lumières correspondant à 4 stratégies d'échantillonage de lumière, ce sont:
+
+* Point Light
+* Spot Light
+* Tube Light
+* Area Light
+
+### 2.2.1. Point light
+
+### 2.2.2. Spot light
+
+### 2.2.3. Tube light
+
+### 2.2.4. Area light
+
 ## 2.3. Scène
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L151C1-L166C80
+
+```cpp
+  std::vector<float> vertices;   ///< The vertices of the scene.
+  std::vector<uint32_t> indices; ///< The indices of the scene.
+  std::vector<float> normals;    ///< The normals of the scene.
+
+  std::vector<boost::optional<tinyobj::material_t>>
+      materials; ///< The materials of the scene.
+
+  std::vector<Triangle> triangles; ///< The triangles of the scene per face.
+
+  std::vector<boost::shared_ptr<BxDF>>
+      bxdfs; ///< The bxdfs of the scene per face.
+
+  std::vector<boost::shared_ptr<Light>>
+      lights; ///< The lights of the scene per face.
+
+  std::vector<Primitive> primitives; ///< The primitives of the scene per face.
+```
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L380C3-L426C4
+
+```cpp
+  void addLight(std::vector<float> newVertices,
+                std::vector<uint32_t> newIndices, std::vector<float> newNormals,
+                float intensity, Vec3f color) {
+    for (uint32_t &i : newIndices) {
+      i += nVertices();
+    }
+    this->vertices.insert(std::end(this->vertices), std::begin(newVertices),
+                          std::end(newVertices));
+    this->indices.insert(std::end(this->indices), std::begin(newIndices),
+                         std::end(newIndices));
+    this->normals.insert(std::end(this->normals), std::begin(newNormals),
+                         std::end(newNormals));
+
+    // populate  triangles
+    for (size_t faceID = nFaces() - (newIndices.size() / 3); faceID < nFaces();
+         ++faceID) {
+      tinyobj::material_t m;
+
+      m.diffuse[0] = color[0];
+      m.diffuse[1] = color[1];
+      m.diffuse[2] = color[2];
+      m.ambient[0] = 0;
+      m.ambient[1] = 0;
+      m.ambient[2] = 0;
+      m.emission[0] = color[0] * (intensity);
+      m.emission[1] = color[1] * (intensity);
+      m.emission[2] = color[2] * (intensity);
+      m.specular[0] = 0.00;
+      m.specular[1] = 0.00;
+      m.specular[2] = 0.00;
+      m.dissolve = 1.0;
+      m.illum = 1;
+
+      this->materials.emplace_back(m);
+
+      // populate BxDF
+      const auto material = this->materials[faceID];
+      if (material) {
+        tinyobj::material_t m = material.value();
+        this->bxdfs.push_back(createBxDF(m));
+      }
+      // default material
+      else {
+        this->bxdfs.push_back(createDefaultBxDF());
+      }
+    }
+  }
+```
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L335C1-L368C4
+
+```cpp
+  void setupTriangles() {
+    // populate  triangles
+    for (size_t faceID = 0; faceID < nFaces(); ++faceID) {
+      // add triangle
+      this->triangles.emplace_back(this->vertices.data(), this->indices.data(),
+                                   this->normals.data(), faceID);
+    }
+
+    // populate lights, primitives
+    for (size_t faceID = 0; faceID < nFaces(); ++faceID) {
+      // add light
+      boost::shared_ptr<Light> light = nullptr;
+      const auto material = this->materials[faceID];
+      // std::cout << "material check" << std::endl;
+      if (material) {
+        tinyobj::material_t m = material.value();
+        light = createAreaLight(m, &this->triangles[faceID]);
+        if (light != nullptr) {
+          lights.push_back(light);
+        }
+      }
+      // add primitive
+      // std::cout << "Adding primitives" << std::endl;
+      primitives.emplace_back(&this->triangles[faceID], this->bxdfs[faceID],
+                              light);
+    }
+    // std::cout << "Triangles setup! " << std::endl;
+
+#ifdef __OUTPUT__
+    std::cout << "[Scene] vertices: " << nVertices() << std::endl;
+    std::cout << "[Scene] faces: " << nFaces() << std::endl;
+    std::cout << "[Scene] lights: " << lights.size() << std::endl;
+#endif
+  }
+```
+
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L730C1-L777C4
+
+```cpp
+  bool intersect(const Ray &ray, IntersectInfo &info) const {
+    RTCRayHit rayhit{};
+    rayhit.ray.org_x = ray.origin[0];
+    rayhit.ray.org_y = ray.origin[1];
+    rayhit.ray.org_z = ray.origin[2];
+    rayhit.ray.dir_x = ray.direction[0];
+    rayhit.ray.dir_y = ray.direction[1];
+    rayhit.ray.dir_z = ray.direction[2];
+    rayhit.ray.tnear = 0;
+    rayhit.ray.tfar = std::numeric_limits<float>::infinity();
+    rayhit.ray.mask = -1;
+
+    rayhit.ray.flags = 0;
+    rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
+    rayhit.hit.instID[0] = RTC_INVALID_GEOMETRY_ID;
+    rayhit.hit.instPrimID[0] = RTC_INVALID_GEOMETRY_ID;
+
+    RTCRayQueryContext context;
+    rtcInitRayQueryContext(&context);
+    RTCIntersectArguments args;
+    rtcInitIntersectArguments(&args);
+    args.context = &context;
+
+    rtcIntersect1(scene, &rayhit, &args);
+
+    if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
+      info.t = rayhit.ray.tfar;
+
+      // get triangle shape
+      const Triangle &tri = this->triangles[rayhit.hit.primID];
+
+      // set surface info
+      info.surfaceInfo.position = ray(info.t);
+      info.surfaceInfo.barycentric = Vec2f(rayhit.hit.u, rayhit.hit.v);
+      info.surfaceInfo.geometricNormal = tri.getGeometricNormal();
+      info.surfaceInfo.shadingNormal =
+          tri.computeShadingNormal(info.surfaceInfo.barycentric);
+      orthonormalBasis(info.surfaceInfo.shadingNormal, info.surfaceInfo.dpdu,
+                       info.surfaceInfo.dpdv);
+
+      // set primitive
+      info.hitPrimitive = &this->primitives[rayhit.hit.primID];
+
+      return true;
+    } else {
+      return false;
+    }
+  }
+```
+
 ## 2.4. Carte de Photon
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/photon_map.hpp#L15
+
+```cpp
+struct Photon {
+    Vec3f throughput;  ///< BxDF * Geometric Term / pdf
+    Vec3f position; ///< The position of the photon in the scene
+    Vec3f wi;  ///<  incident direction
+    unsigned int triId = 0; ///<  id of the triangle on which the photon ended up
+};
+```
+
+KDTree
+
 ## 2.5. Photon Tracing
+
+échantionnage un rayon de lumière
+
+```cpp
+// sample initial ray from light and compute initial throughput
+static Ray sampleRayFromLight(const Scene &scene, Sampler &sampler, Vec3f &throughput) {
+	// sample light
+	float light_choose_pdf;
+	boost::shared_ptr<Light> light = scene.sampleLight(sampler,
+				light_choose_pdf);
+
+	// sample point on light
+	float light_pos_pdf;
+	SurfaceInfo light_surf = light->samplePoint(sampler, light_pos_pdf);
+
+	// sample direction on light
+	float light_dir_pdf;
+	Vec3f dir = light->sampleDirection(light_surf, sampler, light_dir_pdf);
+
+	// spawn ray
+	Ray ray(light_surf.position, dir);
+	Vec3f le = light->Le();
+
+	throughput = le / (light_choose_pdf * light_pos_pdf * light_dir_pdf)
+				* std::abs(dot(dir, light_surf.shadingNormal));
+
+	return ray;
+}
+```
+
 ## 2.6. Photon Collecting
 
+calculer le radiance une region
+
+```cpp
+	// compute reflected radiance with global photon map
+	Vec3f computeRadianceWithPhotonMap(const Vec3f &wo,
+			IntersectInfo &info) const {
+		// get nearby photons
+		float max_dist2;
+		const std::vector<int> photon_indices =
+				globalPhotonMap.queryKNearestPhotons(info.surfaceInfo.position,
+						nEstimationGlobal, max_dist2);
+
+		Vec3f Lo;
+		for (const int photon_idx : photon_indices) {
+			const Photon &photon = globalPhotonMap.getIthPhoton(photon_idx);
+			const Vec3f f = info.hitPrimitive->evaluateBxDF(wo, photon.wi,
+					info.surfaceInfo, TransportDirection::FROM_CAMERA);
+			Lo += f * photon.throughput;
+		}
+		if (!photon_indices.empty()) {
+			Lo /= (nPhotonsGlobal * PI * max_dist2);
+		}
+		return Lo;
+	}
+```
+
+## 2.7. La programme principal
+
 # Reférences
-* Bernard Péroche, Dominique Bechmann. Informatique garaphique et rendu. Lavoisier, 2007.
-* Schill, Steven & Jensen, John & Raber, George & Porter, Dwayne. (2004). Temporal Modeling of Bidirectional Reflection Distribution Function (BRDF) in Coastal Vegetation. GIScience & Remote Sensing. 41. 116-135. 10.2747/1548-1603.41.2.116. 
+* [1] Bernard Péroche, Dominique Bechmann. Informatique garaphique et rendu. Lavoisier, 2007.
+* [2] Schill, Steven & Jensen, John & Raber, George & Porter, Dwayne. (2004). Temporal Modeling of Bidirectional Reflection Distribution Function (BRDF) in Coastal Vegetation. GIScience & Remote Sensing. 41. 116-135. 10.2747/1548-1603.41.2.116. 
+* [3] https://opg.optica.org/ao/abstract.cfm?uri=ao-13-1-109
