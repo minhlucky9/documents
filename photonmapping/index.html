@@ -241,7 +241,7 @@
 <li>La direction de la lumière</li>
 <li>L’énergie lumineuse de ce rayon</li>
 </ul>
-<p>Ci-dessous, c’est l’implémentation de lumière en général. Il va contenir une variable pour stocker l’énergie totale de cette source, des fonctions pour générer le point de départ ainsi que la direction de rayon.</p>
+<p>Ci-dessous, c’est l’implémentation de lumière en général. Il va contenir une variable pour stocker l’énergie totale de cette source en Watt, des fonctions pour générer le point de départ ainsi que la direction de rayon.</p>
 <p>https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/light.hpp#L23C1-L37C3</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="kw">class</span> Light {</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a><span class="kw">public</span>:</span>
@@ -265,219 +265,426 @@
 <li>Tube Light</li>
 <li>Area Light</li>
 </ul>
-<h3 id="point-light">2.2.1. Point light</h3>
-<h3 id="spot-light">2.2.2. Spot light</h3>
-<h3 id="tube-light">2.2.3. Tube light</h3>
-<h3 id="area-light">2.2.4. Area light</h3>
 <h2 id="scène">2.3. Scène</h2>
+<p>La classe de la scène est la classe qui faire des liens entre tous les données de géometries, de matériaux et de lumière pour créer une simulation.</p>
 <p>https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L151C1-L166C80</p>
+<p>Les tableaux qui contiennent les données de géometries.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a>  <span class="bu">std::</span>vector&lt;<span class="dt">float</span>&gt; vertices;   <span class="co">///&lt; The vertices of the scene.</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true"></a>  <span class="bu">std::</span>vector&lt;<span class="dt">uint32_t</span>&gt; indices; <span class="co">///&lt; The indices of the scene.</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true"></a>  <span class="bu">std::</span>vector&lt;<span class="dt">float</span>&gt; normals;    <span class="co">///&lt; The normals of the scene.</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true"></a>  <span class="bu">std::</span>vector&lt;<span class="ex">boost::</span>optional&lt;tinyobj::<span class="dt">material_t</span>&gt;&gt;</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true"></a>      materials; <span class="co">///&lt; The materials of the scene.</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true"></a></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true"></a>  <span class="bu">std::</span>vector&lt;Triangle&gt; triangles; <span class="co">///&lt; The triangles of the scene per face.</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true"></a></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true"></a>  <span class="bu">std::</span>vector&lt;<span class="ex">boost::</span>shared_ptr&lt;BxDF&gt;&gt;</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true"></a>      bxdfs; <span class="co">///&lt; The bxdfs of the scene per face.</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true"></a></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true"></a>  <span class="bu">std::</span>vector&lt;<span class="ex">boost::</span>shared_ptr&lt;Light&gt;&gt;</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true"></a>      lights; <span class="co">///&lt; The lights of the scene per face.</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true"></a></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true"></a>  <span class="bu">std::</span>vector&lt;Primitive&gt; primitives; <span class="co">///&lt; The primitives of the scene per face.</span></span></code></pre></div>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true"></a>  <span class="bu">std::</span>vector&lt;Triangle&gt; triangles; <span class="co">///&lt; The triangles of the scene per face.</span></span></code></pre></div>
+<p>Le tableau qui contiennent les données de matériaux.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a>  <span class="bu">std::</span>vector&lt;<span class="ex">boost::</span>optional&lt;tinyobj::<span class="dt">material_t</span>&gt;&gt;</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a>      materials; <span class="co">///&lt; The materials of the scene.</span></span></code></pre></div>
+<p>Les tableaux qui contiennent les données de lumière ainsi le BxDF pour chaque triangle.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a>  <span class="bu">std::</span>vector&lt;<span class="ex">boost::</span>shared_ptr&lt;BxDF&gt;&gt;</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a>      bxdfs; <span class="co">///&lt; The bxdfs of the scene per face.</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true"></a>  <span class="bu">std::</span>vector&lt;<span class="ex">boost::</span>shared_ptr&lt;Light&gt;&gt;</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true"></a>      lights; <span class="co">///&lt; The lights of the scene per face.</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true"></a>  <span class="bu">std::</span>vector&lt;Primitive&gt; primitives; <span class="co">///&lt; The primitives of the scene per face.</span></span></code></pre></div>
+<h3 id="ajouter-de-la-lumière-dans-la-scène">2.3.1. Ajouter de la lumière dans la scène</h3>
+<p>Ci-dessous, c’est la fonction d’ajouter un source de lumière dans la scène. Cependant, les variables <em>newVertices</em> et <em>newIndices</em> répresentent la forme de géometrie de source (un point, un cylinder, etc). L’intensité et la couleur répresentent l’énergie lumineuse en Watts et le longueur d’onde de la lumière.</p>
 <p>https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L380C3-L426C4</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a>  <span class="dt">void</span> addLight(<span class="bu">std::</span>vector&lt;<span class="dt">float</span>&gt; newVertices,</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a>                <span class="bu">std::</span>vector&lt;<span class="dt">uint32_t</span>&gt; newIndices, <span class="bu">std::</span>vector&lt;<span class="dt">float</span>&gt; newNormals,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a>                <span class="dt">float</span> intensity, Vec3f color) {</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true"></a>    <span class="cf">for</span> (<span class="dt">uint32_t</span> &amp;i : newIndices) {</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true"></a>      i += nVertices();</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true"></a>    }</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true"></a>    <span class="kw">this</span>-&gt;vertices.insert(<span class="bu">std::</span>end(<span class="kw">this</span>-&gt;vertices), <span class="bu">std::</span>begin(newVertices),</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true"></a>                          <span class="bu">std::</span>end(newVertices));</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true"></a>    <span class="kw">this</span>-&gt;indices.insert(<span class="bu">std::</span>end(<span class="kw">this</span>-&gt;indices), <span class="bu">std::</span>begin(newIndices),</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true"></a>                         <span class="bu">std::</span>end(newIndices));</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true"></a>    <span class="kw">this</span>-&gt;normals.insert(<span class="bu">std::</span>end(<span class="kw">this</span>-&gt;normals), <span class="bu">std::</span>begin(newNormals),</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true"></a>                         <span class="bu">std::</span>end(newNormals));</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true"></a></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true"></a>    <span class="co">// populate  triangles</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true"></a>    <span class="cf">for</span> (<span class="dt">size_t</span> faceID = nFaces() - (newIndices.size() / <span class="dv">3</span>); faceID &lt; nFaces();</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true"></a>         ++faceID) {</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true"></a>      tinyobj::<span class="dt">material_t</span> m;</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true"></a></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true"></a>      m.diffuse[<span class="dv">0</span>] = color[<span class="dv">0</span>];</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true"></a>      m.diffuse[<span class="dv">1</span>] = color[<span class="dv">1</span>];</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true"></a>      m.diffuse[<span class="dv">2</span>] = color[<span class="dv">2</span>];</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true"></a>      m.ambient[<span class="dv">0</span>] = <span class="dv">0</span>;</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true"></a>      m.ambient[<span class="dv">1</span>] = <span class="dv">0</span>;</span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true"></a>      m.ambient[<span class="dv">2</span>] = <span class="dv">0</span>;</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true"></a>      m.emission[<span class="dv">0</span>] = color[<span class="dv">0</span>] * (intensity);</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true"></a>      m.emission[<span class="dv">1</span>] = color[<span class="dv">1</span>] * (intensity);</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true"></a>      m.emission[<span class="dv">2</span>] = color[<span class="dv">2</span>] * (intensity);</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true"></a>      m.specular[<span class="dv">0</span>] = <span class="fl">0.00</span>;</span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true"></a>      m.specular[<span class="dv">1</span>] = <span class="fl">0.00</span>;</span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true"></a>      m.specular[<span class="dv">2</span>] = <span class="fl">0.00</span>;</span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true"></a>      m.dissolve = <span class="fl">1.0</span>;</span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true"></a>      m.illum = <span class="dv">1</span>;</span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true"></a></span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true"></a>      <span class="kw">this</span>-&gt;materials.emplace_back(m);</span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true"></a></span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true"></a>      <span class="co">// populate BxDF</span></span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true"></a>      <span class="at">const</span> <span class="kw">auto</span> material = <span class="kw">this</span>-&gt;materials[faceID];</span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true"></a>      <span class="cf">if</span> (material) {</span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true"></a>        tinyobj::<span class="dt">material_t</span> m = material.value();</span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true"></a>        <span class="kw">this</span>-&gt;bxdfs.push_back(createBxDF(m));</span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true"></a>      }</span>
-<span id="cb8-42"><a href="#cb8-42" aria-hidden="true"></a>      <span class="co">// default material</span></span>
-<span id="cb8-43"><a href="#cb8-43" aria-hidden="true"></a>      <span class="cf">else</span> {</span>
-<span id="cb8-44"><a href="#cb8-44" aria-hidden="true"></a>        <span class="kw">this</span>-&gt;bxdfs.push_back(createDefaultBxDF());</span>
-<span id="cb8-45"><a href="#cb8-45" aria-hidden="true"></a>      }</span>
-<span id="cb8-46"><a href="#cb8-46" aria-hidden="true"></a>    }</span>
-<span id="cb8-47"><a href="#cb8-47" aria-hidden="true"></a>  }</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a>  <span class="dt">void</span> addLight(<span class="bu">std::</span>vector&lt;<span class="dt">float</span>&gt; newVertices,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true"></a>                <span class="bu">std::</span>vector&lt;<span class="dt">uint32_t</span>&gt; newIndices, <span class="bu">std::</span>vector&lt;<span class="dt">float</span>&gt; newNormals,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true"></a>                <span class="dt">float</span> intensity, Vec3f color) {</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true"></a>    <span class="cf">for</span> (<span class="dt">uint32_t</span> &amp;i : newIndices) {</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true"></a>      i += nVertices();</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true"></a>    }</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true"></a>    <span class="kw">this</span>-&gt;vertices.insert(<span class="bu">std::</span>end(<span class="kw">this</span>-&gt;vertices), <span class="bu">std::</span>begin(newVertices),</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true"></a>                          <span class="bu">std::</span>end(newVertices));</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true"></a>    <span class="kw">this</span>-&gt;indices.insert(<span class="bu">std::</span>end(<span class="kw">this</span>-&gt;indices), <span class="bu">std::</span>begin(newIndices),</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true"></a>                         <span class="bu">std::</span>end(newIndices));</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true"></a>    <span class="kw">this</span>-&gt;normals.insert(<span class="bu">std::</span>end(<span class="kw">this</span>-&gt;normals), <span class="bu">std::</span>begin(newNormals),</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true"></a>                         <span class="bu">std::</span>end(newNormals));</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true"></a>    <span class="co">// populate  triangles</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true"></a>    <span class="cf">for</span> (<span class="dt">size_t</span> faceID = nFaces() - (newIndices.size() / <span class="dv">3</span>); faceID &lt; nFaces();</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true"></a>         ++faceID) {</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true"></a>      tinyobj::<span class="dt">material_t</span> m;</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true"></a>      m.diffuse[<span class="dv">0</span>] = color[<span class="dv">0</span>];</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true"></a>      m.diffuse[<span class="dv">1</span>] = color[<span class="dv">1</span>];</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true"></a>      m.diffuse[<span class="dv">2</span>] = color[<span class="dv">2</span>];</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true"></a>      m.ambient[<span class="dv">0</span>] = <span class="dv">0</span>;</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true"></a>      m.ambient[<span class="dv">1</span>] = <span class="dv">0</span>;</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true"></a>      m.ambient[<span class="dv">2</span>] = <span class="dv">0</span>;</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true"></a>      m.emission[<span class="dv">0</span>] = color[<span class="dv">0</span>] * (intensity);</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true"></a>      m.emission[<span class="dv">1</span>] = color[<span class="dv">1</span>] * (intensity);</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true"></a>      m.emission[<span class="dv">2</span>] = color[<span class="dv">2</span>] * (intensity);</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true"></a>      m.specular[<span class="dv">0</span>] = <span class="fl">0.00</span>;</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true"></a>      m.specular[<span class="dv">1</span>] = <span class="fl">0.00</span>;</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true"></a>      m.specular[<span class="dv">2</span>] = <span class="fl">0.00</span>;</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true"></a>      m.dissolve = <span class="fl">1.0</span>;</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true"></a>      m.illum = <span class="dv">1</span>;</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true"></a></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true"></a>      <span class="kw">this</span>-&gt;materials.emplace_back(m);</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true"></a></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true"></a>      <span class="co">// populate BxDF</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true"></a>      <span class="at">const</span> <span class="kw">auto</span> material = <span class="kw">this</span>-&gt;materials[faceID];</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true"></a>      <span class="cf">if</span> (material) {</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true"></a>        tinyobj::<span class="dt">material_t</span> m = material.value();</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true"></a>        <span class="kw">this</span>-&gt;bxdfs.push_back(createBxDF(m));</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true"></a>      }</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true"></a>      <span class="co">// default material</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true"></a>      <span class="cf">else</span> {</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true"></a>        <span class="kw">this</span>-&gt;bxdfs.push_back(createDefaultBxDF());</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true"></a>      }</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true"></a>    }</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true"></a>  }</span></code></pre></div>
+<p>Après d’ajouter des sources de lumière par cette fonction, il faut d’appeler la fonction setupTriangles() pour qu’il puisse générer des <em>AreaLights</em> de ces sources. Chaque <em>AreaLight</em> va correspondre à un des triangles qui répresentent la forme de source de la lumière. D’autre part, cette fonction va stocker aussi les addresses des triangles, des lumières ainsi que des BXDF dans un dictionnaire, le tableau <em>primitives</em>. Cela va faciliter la recherche des données utilisées pour calculer la réflexion de la lumière dans les phases suivant.</p>
 <p>https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L335C1-L368C4</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a>  <span class="dt">void</span> setupTriangles() {</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a>    <span class="co">// populate  triangles</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a>    <span class="cf">for</span> (<span class="dt">size_t</span> faceID = <span class="dv">0</span>; faceID &lt; nFaces(); ++faceID) {</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true"></a>      <span class="co">// add triangle</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true"></a>      <span class="kw">this</span>-&gt;triangles.emplace_back(<span class="kw">this</span>-&gt;vertices.data(), <span class="kw">this</span>-&gt;indices.data(),</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true"></a>                                   <span class="kw">this</span>-&gt;normals.data(), faceID);</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true"></a>    }</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true"></a></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true"></a>    <span class="co">// populate lights, primitives</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true"></a>    <span class="cf">for</span> (<span class="dt">size_t</span> faceID = <span class="dv">0</span>; faceID &lt; nFaces(); ++faceID) {</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true"></a>      <span class="co">// add light</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true"></a>      <span class="ex">boost::</span>shared_ptr&lt;Light&gt; light = <span class="kw">nullptr</span>;</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true"></a>      <span class="at">const</span> <span class="kw">auto</span> material = <span class="kw">this</span>-&gt;materials[faceID];</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true"></a>      <span class="co">// std::cout &lt;&lt; &quot;material check&quot; &lt;&lt; std::endl;</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true"></a>      <span class="cf">if</span> (material) {</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true"></a>        tinyobj::<span class="dt">material_t</span> m = material.value();</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true"></a>        light = createAreaLight(m, &amp;<span class="kw">this</span>-&gt;triangles[faceID]);</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true"></a>        <span class="cf">if</span> (light != <span class="kw">nullptr</span>) {</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true"></a>          lights.push_back(light);</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true"></a>        }</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true"></a>      }</span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true"></a>      <span class="co">// add primitive</span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true"></a>      <span class="co">// std::cout &lt;&lt; &quot;Adding primitives&quot; &lt;&lt; std::endl;</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true"></a>      primitives.emplace_back(&amp;<span class="kw">this</span>-&gt;triangles[faceID], <span class="kw">this</span>-&gt;bxdfs[faceID],</span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true"></a>                              light);</span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true"></a>    }</span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true"></a>    <span class="co">// std::cout &lt;&lt; &quot;Triangles setup! &quot; &lt;&lt; std::endl;</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true"></a></span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true"></a><span class="pp">#ifdef __OUTPUT__</span></span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true"></a>    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;[Scene] vertices: &quot;</span> &lt;&lt; nVertices() &lt;&lt; <span class="bu">std::</span>endl;</span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true"></a>    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;[Scene] faces: &quot;</span> &lt;&lt; nFaces() &lt;&lt; <span class="bu">std::</span>endl;</span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true"></a>    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;[Scene] lights: &quot;</span> &lt;&lt; lights.size() &lt;&lt; <span class="bu">std::</span>endl;</span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true"></a><span class="pp">#endif</span></span>
-<span id="cb9-34"><a href="#cb9-34" aria-hidden="true"></a>  }</span></code></pre></div>
-<p>https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L730C1-L777C4</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a>  <span class="dt">bool</span> intersect(<span class="at">const</span> Ray &amp;ray, IntersectInfo &amp;info) <span class="at">const</span> {</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true"></a>    RTCRayHit rayhit{};</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true"></a>    rayhit.ray.org_x = ray.origin[<span class="dv">0</span>];</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true"></a>    rayhit.ray.org_y = ray.origin[<span class="dv">1</span>];</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true"></a>    rayhit.ray.org_z = ray.origin[<span class="dv">2</span>];</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true"></a>    rayhit.ray.dir_x = ray.direction[<span class="dv">0</span>];</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true"></a>    rayhit.ray.dir_y = ray.direction[<span class="dv">1</span>];</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true"></a>    rayhit.ray.dir_z = ray.direction[<span class="dv">2</span>];</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true"></a>    rayhit.ray.tnear = <span class="dv">0</span>;</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true"></a>    rayhit.ray.tfar = <span class="bu">std::</span>numeric_limits&lt;<span class="dt">float</span>&gt;::infinity();</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true"></a>    rayhit.ray.mask = -<span class="dv">1</span>;</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true"></a></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true"></a>    rayhit.ray.flags = <span class="dv">0</span>;</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true"></a>    rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true"></a>    rayhit.hit.instID[<span class="dv">0</span>] = RTC_INVALID_GEOMETRY_ID;</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true"></a>    rayhit.hit.instPrimID[<span class="dv">0</span>] = RTC_INVALID_GEOMETRY_ID;</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true"></a></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true"></a>    RTCRayQueryContext context;</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true"></a>    rtcInitRayQueryContext(&amp;context);</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true"></a>    RTCIntersectArguments args;</span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true"></a>    rtcInitIntersectArguments(&amp;args);</span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true"></a>    args.context = &amp;context;</span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true"></a></span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true"></a>    rtcIntersect1(scene, &amp;rayhit, &amp;args);</span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true"></a></span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true"></a>    <span class="cf">if</span> (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {</span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true"></a>      info.t = rayhit.ray.tfar;</span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true"></a></span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true"></a>      <span class="co">// get triangle shape</span></span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true"></a>      <span class="at">const</span> Triangle &amp;tri = <span class="kw">this</span>-&gt;triangles[rayhit.hit.primID];</span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true"></a></span>
-<span id="cb10-32"><a href="#cb10-32" aria-hidden="true"></a>      <span class="co">// set surface info</span></span>
-<span id="cb10-33"><a href="#cb10-33" aria-hidden="true"></a>      info.surfaceInfo.position = ray(info.t);</span>
-<span id="cb10-34"><a href="#cb10-34" aria-hidden="true"></a>      info.surfaceInfo.barycentric = Vec2f(rayhit.hit.u, rayhit.hit.v);</span>
-<span id="cb10-35"><a href="#cb10-35" aria-hidden="true"></a>      info.surfaceInfo.geometricNormal = tri.getGeometricNormal();</span>
-<span id="cb10-36"><a href="#cb10-36" aria-hidden="true"></a>      info.surfaceInfo.shadingNormal =</span>
-<span id="cb10-37"><a href="#cb10-37" aria-hidden="true"></a>          tri.computeShadingNormal(info.surfaceInfo.barycentric);</span>
-<span id="cb10-38"><a href="#cb10-38" aria-hidden="true"></a>      orthonormalBasis(info.surfaceInfo.shadingNormal, info.surfaceInfo.dpdu,</span>
-<span id="cb10-39"><a href="#cb10-39" aria-hidden="true"></a>                       info.surfaceInfo.dpdv);</span>
-<span id="cb10-40"><a href="#cb10-40" aria-hidden="true"></a></span>
-<span id="cb10-41"><a href="#cb10-41" aria-hidden="true"></a>      <span class="co">// set primitive</span></span>
-<span id="cb10-42"><a href="#cb10-42" aria-hidden="true"></a>      info.hitPrimitive = &amp;<span class="kw">this</span>-&gt;primitives[rayhit.hit.primID];</span>
-<span id="cb10-43"><a href="#cb10-43" aria-hidden="true"></a></span>
-<span id="cb10-44"><a href="#cb10-44" aria-hidden="true"></a>      <span class="cf">return</span> <span class="kw">true</span>;</span>
-<span id="cb10-45"><a href="#cb10-45" aria-hidden="true"></a>    } <span class="cf">else</span> {</span>
-<span id="cb10-46"><a href="#cb10-46" aria-hidden="true"></a>      <span class="cf">return</span> <span class="kw">false</span>;</span>
-<span id="cb10-47"><a href="#cb10-47" aria-hidden="true"></a>    }</span>
-<span id="cb10-48"><a href="#cb10-48" aria-hidden="true"></a>  }</span></code></pre></div>
-<h2 id="carte-de-photon">2.4. Carte de Photon</h2>
-<p>https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/photon_map.hpp#L15</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a><span class="kw">struct</span> Photon {</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true"></a>    Vec3f throughput;  <span class="co">///&lt; BxDF * Geometric Term / pdf</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true"></a>    Vec3f position; <span class="co">///&lt; The position of the photon in the scene</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true"></a>    Vec3f wi;  <span class="co">///&lt;  incident direction</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true"></a>    <span class="dt">unsigned</span> <span class="dt">int</span> triId = <span class="dv">0</span>; <span class="co">///&lt;  id of the triangle on which the photon ended up</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true"></a>};</span></code></pre></div>
-<p>KDTree</p>
-<h2 id="photon-tracing-1">2.5. Photon Tracing</h2>
-<p>échantionnage un rayon de lumière</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a><span class="co">// sample initial ray from light and compute initial throughput</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true"></a><span class="at">static</span> Ray sampleRayFromLight(<span class="at">const</span> Scene &amp;scene, Sampler &amp;sampler, Vec3f &amp;throughput) {</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true"></a>    <span class="co">// sample light</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true"></a>    <span class="dt">float</span> light_choose_pdf;</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true"></a>    <span class="ex">boost::</span>shared_ptr&lt;Light&gt; light = scene.sampleLight(sampler,</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true"></a>                light_choose_pdf);</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true"></a></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true"></a>    <span class="co">// sample point on light</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true"></a>    <span class="dt">float</span> light_pos_pdf;</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true"></a>    SurfaceInfo light_surf = light-&gt;samplePoint(sampler, light_pos_pdf);</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true"></a></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true"></a>    <span class="co">// sample direction on light</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true"></a>    <span class="dt">float</span> light_dir_pdf;</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true"></a>    Vec3f dir = light-&gt;sampleDirection(light_surf, sampler, light_dir_pdf);</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true"></a></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true"></a>    <span class="co">// spawn ray</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true"></a>    Ray ray(light_surf.position, dir);</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true"></a>    Vec3f le = light-&gt;Le();</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true"></a></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true"></a>    throughput = le / (light_choose_pdf * light_pos_pdf * light_dir_pdf)</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true"></a>                * <span class="bu">std::</span>abs(dot(dir, light_surf.shadingNormal));</span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true"></a></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true"></a>    <span class="cf">return</span> ray;</span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true"></a>}</span></code></pre></div>
-<h2 id="photon-collecting-1">2.6. Photon Collecting</h2>
-<p>calculer le radiance une region</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a>    <span class="co">// compute reflected radiance with global photon map</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true"></a>    Vec3f computeRadianceWithPhotonMap(<span class="at">const</span> Vec3f &amp;wo,</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true"></a>            IntersectInfo &amp;info) <span class="at">const</span> {</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true"></a>        <span class="co">// get nearby photons</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true"></a>        <span class="dt">float</span> max_dist2;</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true"></a>        <span class="at">const</span> <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; photon_indices =</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true"></a>                globalPhotonMap.queryKNearestPhotons(info.surfaceInfo.position,</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true"></a>                        nEstimationGlobal, max_dist2);</span>
+<div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a>  <span class="dt">void</span> setupTriangles() {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true"></a>    <span class="co">// populate  triangles</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true"></a>    <span class="cf">for</span> (<span class="dt">size_t</span> faceID = <span class="dv">0</span>; faceID &lt; nFaces(); ++faceID) {</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true"></a>      <span class="co">// add triangle</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true"></a>      <span class="kw">this</span>-&gt;triangles.emplace_back(<span class="kw">this</span>-&gt;vertices.data(), <span class="kw">this</span>-&gt;indices.data(),</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true"></a>                                   <span class="kw">this</span>-&gt;normals.data(), faceID);</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true"></a>    }</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true"></a>    <span class="co">// populate lights, primitives</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true"></a>    <span class="cf">for</span> (<span class="dt">size_t</span> faceID = <span class="dv">0</span>; faceID &lt; nFaces(); ++faceID) {</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true"></a>      <span class="co">// add light</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true"></a>      <span class="ex">boost::</span>shared_ptr&lt;Light&gt; light = <span class="kw">nullptr</span>;</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true"></a>      <span class="at">const</span> <span class="kw">auto</span> material = <span class="kw">this</span>-&gt;materials[faceID];</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true"></a>      <span class="co">// std::cout &lt;&lt; &quot;material check&quot; &lt;&lt; std::endl;</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true"></a>      <span class="cf">if</span> (material) {</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true"></a>        tinyobj::<span class="dt">material_t</span> m = material.value();</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true"></a>        light = createAreaLight(m, &amp;<span class="kw">this</span>-&gt;triangles[faceID]);</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true"></a>        <span class="cf">if</span> (light != <span class="kw">nullptr</span>) {</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true"></a>          lights.push_back(light);</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true"></a>        }</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true"></a>      }</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true"></a>      <span class="co">// add primitive</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true"></a>      <span class="co">// std::cout &lt;&lt; &quot;Adding primitives&quot; &lt;&lt; std::endl;</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true"></a>      primitives.emplace_back(&amp;<span class="kw">this</span>-&gt;triangles[faceID], <span class="kw">this</span>-&gt;bxdfs[faceID],</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true"></a>                              light);</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true"></a>    }</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true"></a>    <span class="co">// std::cout &lt;&lt; &quot;Triangles setup! &quot; &lt;&lt; std::endl;</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true"></a></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true"></a><span class="pp">#ifdef __OUTPUT__</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true"></a>    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;[Scene] vertices: &quot;</span> &lt;&lt; nVertices() &lt;&lt; <span class="bu">std::</span>endl;</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true"></a>    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;[Scene] faces: &quot;</span> &lt;&lt; nFaces() &lt;&lt; <span class="bu">std::</span>endl;</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true"></a>    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;[Scene] lights: &quot;</span> &lt;&lt; lights.size() &lt;&lt; <span class="bu">std::</span>endl;</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true"></a><span class="pp">#endif</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true"></a>  }</span></code></pre></div>
+<h3 id="ajouter-des-autres-objets-dans-la-scène">2.3.2. Ajouter des autres objets dans la scène</h3>
+<p>Voici la fonction d’ajouter les autres objets que la lumière à la scène. Cependant, les variables <em>vertices</em> et <em>indices</em> sont répresenté la géometrie.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a><span class="dt">void</span> addFaceInfosMat(<span class="bu">std::</span>vector&lt;<span class="dt">float</span>&gt; vertices,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true"></a>                       <span class="bu">std::</span>vector&lt;<span class="dt">uint32_t</span>&gt; indices,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true"></a>                       <span class="bu">std::</span>vector&lt;<span class="dt">float</span>&gt; normals, Material mat) {</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true"></a>    <span class="cf">for</span> (<span class="dt">uint32_t</span> &amp;i : indices) {</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true"></a>      i += nVertices();</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true"></a>    }</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true"></a>    <span class="kw">this</span>-&gt;vertices.insert(<span class="bu">std::</span>end(<span class="kw">this</span>-&gt;vertices), <span class="bu">std::</span>begin(vertices),</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true"></a>                          <span class="bu">std::</span>end(vertices));</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true"></a>    <span class="kw">this</span>-&gt;indices.insert(<span class="bu">std::</span>end(<span class="kw">this</span>-&gt;indices), <span class="bu">std::</span>begin(indices),</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true"></a>                         <span class="bu">std::</span>end(indices));</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true"></a>    <span class="kw">this</span>-&gt;normals.insert(<span class="bu">std::</span>end(<span class="kw">this</span>-&gt;normals), <span class="bu">std::</span>begin(normals),</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true"></a>                         <span class="bu">std::</span>end(normals));</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true"></a>    <span class="co">// populate materials</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true"></a>    <span class="cf">for</span> (<span class="dt">size_t</span> faceID = nFaces() - (indices.size() / <span class="dv">3</span>); faceID &lt; nFaces();</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true"></a>         ++faceID) {</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true"></a>      tinyobj::<span class="dt">material_t</span> m;</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true"></a></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true"></a>      m.diffuse[<span class="dv">0</span>] = mat.diffuse[<span class="dv">0</span>];</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true"></a>      m.diffuse[<span class="dv">1</span>] = mat.diffuse[<span class="dv">1</span>];</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true"></a>      m.diffuse[<span class="dv">2</span>] = mat.diffuse[<span class="dv">2</span>];</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true"></a>      m.ambient[<span class="dv">0</span>] = mat.ambient[<span class="dv">0</span>];</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true"></a>      m.ambient[<span class="dv">1</span>] = mat.ambient[<span class="dv">1</span>];</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true"></a>      m.ambient[<span class="dv">2</span>] = mat.ambient[<span class="dv">2</span>];</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true"></a>      m.emission[<span class="dv">0</span>] = <span class="fl">0.00</span>;</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true"></a>      m.emission[<span class="dv">1</span>] = <span class="fl">0.00</span>;</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true"></a>      m.emission[<span class="dv">2</span>] = <span class="fl">0.00</span>;</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true"></a>      m.specular[<span class="dv">0</span>] = mat.specular[<span class="dv">0</span>];</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true"></a>      m.specular[<span class="dv">1</span>] = mat.specular[<span class="dv">1</span>];</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true"></a>      m.specular[<span class="dv">2</span>] = mat.specular[<span class="dv">2</span>];</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true"></a>      m.shininess = mat.shininess;</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true"></a>      m.dissolve = <span class="fl">1.0</span><span class="bu">f</span> - mat.transparency;</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true"></a>      m.ior = mat.ior;</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true"></a>      <span class="cf">if</span> (mat.transparency &gt; <span class="dv">0</span>)</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true"></a>        m.illum = <span class="dv">7</span>;</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true"></a>      <span class="cf">else</span></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true"></a>        m.illum = mat.illum;</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true"></a>      <span class="kw">this</span>-&gt;materials.emplace_back(m);</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true"></a>      <span class="co">// populate BxDF</span></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true"></a>      <span class="at">const</span> <span class="kw">auto</span> material = <span class="kw">this</span>-&gt;materials[faceID];</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true"></a>      <span class="cf">if</span> (material) {</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true"></a>        tinyobj::<span class="dt">material_t</span> m = material.value();</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true"></a>        <span class="kw">this</span>-&gt;bxdfs.push_back(</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true"></a>            createBxDF(m, mat.reflectance, mat.transmittance, mat.roughness));</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true"></a>      }</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true"></a>      <span class="co">// default material</span></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true"></a>      <span class="cf">else</span> {</span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true"></a>        <span class="kw">this</span>-&gt;bxdfs.push_back(createDefaultBxDF());</span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true"></a>      }</span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true"></a>    }</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true"></a>  }</span></code></pre></div>
+<p>Dans ce code, après de stocker tous les vertices et triangles ainsi que le matériel dans la scène, on va générer un BxDF pour chaque triangle du maillage. Cela va nous aider à calculer la réflexion sur chaque triangle plus facile.</p>
+<p>https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L32C1-L66C2</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a><span class="ex">boost::</span>shared_ptr&lt;BxDF&gt; createBxDF(tinyobj::<span class="dt">material_t</span> &amp;material,</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true"></a>                                   <span class="dt">float</span> reflectance = <span class="fl">0.0</span><span class="bu">f</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true"></a>                                   <span class="dt">float</span> transmittance = <span class="fl">0.0</span><span class="bu">f</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true"></a>                                   <span class="dt">float</span> roughness = <span class="fl">0.5</span><span class="bu">f</span>) {</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true"></a>  <span class="at">const</span> Vec3f kd =</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true"></a>      Vec3f(material.diffuse[<span class="dv">0</span>], material.diffuse[<span class="dv">1</span>], material.diffuse[<span class="dv">2</span>]);</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true"></a>  <span class="at">const</span> Vec3f ks =</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true"></a>      Vec3f(material.specular[<span class="dv">0</span>], material.specular[<span class="dv">1</span>], material.specular[<span class="dv">2</span>]);</span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true"></a></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true"></a>        Vec3f Lo;</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true"></a>        <span class="cf">for</span> (<span class="at">const</span> <span class="dt">int</span> photon_idx : photon_indices) {</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true"></a>            <span class="at">const</span> Photon &amp;photon = globalPhotonMap.getIthPhoton(photon_idx);</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true"></a>            <span class="at">const</span> Vec3f f = info.hitPrimitive-&gt;evaluateBxDF(wo, photon.wi,</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true"></a>                    info.surfaceInfo, TransportDirection::FROM_CAMERA);</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true"></a>            Lo += f * photon.throughput;</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true"></a>        }</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true"></a>        <span class="cf">if</span> (!photon_indices.empty()) {</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true"></a>            Lo /= (nPhotonsGlobal * PI * max_dist2);</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true"></a>        }</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true"></a>        <span class="cf">return</span> Lo;</span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true"></a>    }</span></code></pre></div>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true"></a>  <span class="cf">if</span> (material.illum == <span class="dv">2</span> &amp;&amp; (ks == Vec3fZero)) {</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true"></a>    material.illum = <span class="dv">1</span>;</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true"></a>  }</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true"></a>  <span class="cf">switch</span> (material.illum) {</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true"></a>  <span class="cf">case</span> <span class="dv">2</span>:</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true"></a>    <span class="cf">return</span> <span class="ex">boost::</span>make_shared&lt;Mirror&gt;(ks);</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true"></a>  <span class="cf">case</span> <span class="dv">5</span>:</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true"></a>    <span class="co">// mirror</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true"></a>    <span class="cf">return</span> <span class="ex">boost::</span>make_shared&lt;Mirror&gt;(Vec3f(<span class="fl">1.0</span><span class="bu">f</span>));</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true"></a>  <span class="cf">case</span> <span class="dv">6</span>:</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true"></a>    <span class="co">// leaf</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true"></a>    material.ior = <span class="fl">1.425</span><span class="bu">f</span>; <span class="co">// Source:</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true"></a>    <span class="co">// https://opg.optica.org/ao/abstract.cfm?uri=ao-13-1-109</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true"></a>    <span class="cf">return</span> <span class="ex">boost::</span>make_shared&lt;Leaf&gt;(kd, material.ior, roughness);</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true"></a>  <span class="cf">case</span> <span class="dv">7</span>:</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true"></a>    <span class="co">// Transparent</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true"></a>    <span class="cf">return</span> <span class="ex">boost::</span>make_shared&lt;Transparent&gt;(kd, material.ior);</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true"></a>  <span class="cf">case</span> <span class="dv">9</span>:</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true"></a>    <span class="cf">return</span> <span class="ex">boost::</span>make_shared&lt;Refltr&gt;(kd, reflectance, transmittance,</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true"></a>                                      roughness);</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true"></a>  <span class="cf">default</span>:</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true"></a>    <span class="co">// lambert</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true"></a>    <span class="cf">return</span> <span class="ex">boost::</span>make_shared&lt;Lambert&gt;(kd);</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true"></a>  }</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true"></a>}</span></code></pre></div>
+<h3 id="calculer-dintersection">2.3.3. Calculer d’intersection</h3>
+<p>Afin de calculer l’intersection entre un rayon et tous les triangles dans la scène, on utilise la bibliothèque de Embree. En effet, d’abord, on construire un scène de Embree avec tous les tableux des données de géometrie et de matériel. Ensuite, on utilise la fonction <em>rtcIntersect1</em> de Embree pour obtenir la résultat de l’intersection.</p>
+<p>https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L687C3-L721C4</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true"></a><span class="dt">void</span> build() {</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true"></a><span class="pp">#ifdef __OUTPUT__</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true"></a>    <span class="bu">std::</span>cout &lt;&lt; <span class="st">&quot;[Scene] building scene...&quot;</span> &lt;&lt; <span class="bu">std::</span>endl;</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true"></a><span class="pp">#endif</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true"></a>    <span class="co">// setup embree</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true"></a>    device = rtcNewDevice(<span class="kw">nullptr</span>);</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true"></a>    scene = rtcNewScene(device);</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true"></a>    rtcSetSceneBuildQuality(scene, RTC_BUILD_QUALITY_MEDIUM);</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true"></a>    rtcSetSceneFlags(scene, RTC_SCENE_FLAG_ROBUST);</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true"></a>    RTCGeometry geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true"></a>    <span class="co">// set vertices</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true"></a>    <span class="dt">float</span> *vb = (<span class="dt">float</span> *)rtcSetNewGeometryBuffer(</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true"></a>        geom, RTC_BUFFER_TYPE_VERTEX, <span class="dv">0</span>, RTC_FORMAT_FLOAT3, <span class="dv">3</span> * <span class="kw">sizeof</span>(<span class="dt">float</span>),</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true"></a>        nVertices());</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true"></a>    <span class="cf">for</span> (<span class="dt">size_t</span> i = <span class="dv">0</span>; i &lt; vertices.size(); ++i) {</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true"></a>      vb[i] = vertices[i];</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true"></a>    }</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true"></a>    <span class="co">// set indices</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true"></a>    <span class="dt">uint32_t</span> *ib = (<span class="dt">uint32_t</span> *)rtcSetNewGeometryBuffer(</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true"></a>        geom, RTC_BUFFER_TYPE_INDEX, <span class="dv">0</span>, RTC_FORMAT_UINT3, <span class="dv">3</span> * <span class="kw">sizeof</span>(<span class="dt">uint32_t</span>),</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true"></a>        nFaces());</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true"></a>    <span class="cf">for</span> (<span class="dt">size_t</span> i = <span class="dv">0</span>; i &lt; indices.size(); ++i) {</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true"></a>      ib[i] = indices[i];</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true"></a>    }</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true"></a></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true"></a>    rtcCommitGeometry(geom);</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true"></a>    rtcAttachGeometry(scene, geom);</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true"></a>    rtcReleaseGeometry(geom);</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true"></a>    rtcCommitScene(scene);</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true"></a>  }</span></code></pre></div>
+<p>https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L730C1-L777C4</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true"></a>  <span class="dt">bool</span> intersect(<span class="at">const</span> Ray &amp;ray, IntersectInfo &amp;info) <span class="at">const</span> {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true"></a>    RTCRayHit rayhit{};</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true"></a>    rayhit.ray.org_x = ray.origin[<span class="dv">0</span>];</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true"></a>    rayhit.ray.org_y = ray.origin[<span class="dv">1</span>];</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true"></a>    rayhit.ray.org_z = ray.origin[<span class="dv">2</span>];</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true"></a>    rayhit.ray.dir_x = ray.direction[<span class="dv">0</span>];</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true"></a>    rayhit.ray.dir_y = ray.direction[<span class="dv">1</span>];</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true"></a>    rayhit.ray.dir_z = ray.direction[<span class="dv">2</span>];</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true"></a>    rayhit.ray.tnear = <span class="dv">0</span>;</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true"></a>    rayhit.ray.tfar = <span class="bu">std::</span>numeric_limits&lt;<span class="dt">float</span>&gt;::infinity();</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true"></a>    rayhit.ray.mask = -<span class="dv">1</span>;</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true"></a>    rayhit.ray.flags = <span class="dv">0</span>;</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true"></a>    rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true"></a>    rayhit.hit.instID[<span class="dv">0</span>] = RTC_INVALID_GEOMETRY_ID;</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true"></a>    rayhit.hit.instPrimID[<span class="dv">0</span>] = RTC_INVALID_GEOMETRY_ID;</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true"></a></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true"></a>    RTCRayQueryContext context;</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true"></a>    rtcInitRayQueryContext(&amp;context);</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true"></a>    RTCIntersectArguments args;</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true"></a>    rtcInitIntersectArguments(&amp;args);</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true"></a>    args.context = &amp;context;</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true"></a></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true"></a>    rtcIntersect1(scene, &amp;rayhit, &amp;args);</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true"></a></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true"></a>    <span class="cf">if</span> (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true"></a>      info.t = rayhit.ray.tfar;</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true"></a></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true"></a>      <span class="co">// get triangle shape</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true"></a>      <span class="at">const</span> Triangle &amp;tri = <span class="kw">this</span>-&gt;triangles[rayhit.hit.primID];</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true"></a></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true"></a>      <span class="co">// set surface info</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true"></a>      info.surfaceInfo.position = ray(info.t);</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true"></a>      info.surfaceInfo.barycentric = Vec2f(rayhit.hit.u, rayhit.hit.v);</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true"></a>      info.surfaceInfo.geometricNormal = tri.getGeometricNormal();</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true"></a>      info.surfaceInfo.shadingNormal =</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true"></a>          tri.computeShadingNormal(info.surfaceInfo.barycentric);</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true"></a>      orthonormalBasis(info.surfaceInfo.shadingNormal, info.surfaceInfo.dpdu,</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true"></a>                       info.surfaceInfo.dpdv);</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true"></a></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true"></a>      <span class="co">// set primitive</span></span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true"></a>      info.hitPrimitive = &amp;<span class="kw">this</span>-&gt;primitives[rayhit.hit.primID];</span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true"></a></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true"></a>      <span class="cf">return</span> <span class="kw">true</span>;</span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true"></a>    } <span class="cf">else</span> {</span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true"></a>      <span class="cf">return</span> <span class="kw">false</span>;</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true"></a>    }</span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true"></a>  }</span></code></pre></div>
+<h2 id="carte-de-photon">2.4. Carte de Photon</h2>
+<p>Dans la carte de photon, chaque photon contiens l’énergie lumineuse en Watts, la position de photon, la direction de la lumière vers la surface et l’index du triangle contenant le photon.</p>
+<p>https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/photon_map.hpp#L15</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true"></a><span class="kw">struct</span> Photon {</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true"></a>    Vec3f throughput;  <span class="co">///&lt; BxDF * Cos Term / pdf</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true"></a>    Vec3f position; <span class="co">///&lt; The position of the photon in the scene</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true"></a>    Vec3f wi;  <span class="co">///&lt;  incident direction</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true"></a>    <span class="dt">unsigned</span> <span class="dt">int</span> triId = <span class="dv">0</span>; <span class="co">///&lt;  id of the triangle on which the photon ended up</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true"></a>};</span></code></pre></div>
+<p>La carte de photon peut être stocker sous la forme d’un KdTree ou un tableau.</p>
+<h2 id="photon-tracing-1">2.5. Photon Tracing</h2>
+<p>Le pseudocode de la phase de Photon Tracing:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true"></a>  nb_sample = <span class="dv">10000000</span>;</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true"></a>  maxDepth = <span class="dv">100</span>;</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true"></a>  <span class="cf">for</span> l: <span class="dv">0</span> -&gt; nb_light:</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true"></a>    <span class="cf">for</span> s: <span class="dv">0</span> -&gt; nb_sample/nb_light:</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true"></a>      <span class="pp">#</span><span class="er">Échantionner un rayon de lumière</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true"></a>      <span class="cf">for</span> k: <span class="dv">0</span> -&gt; maxDepth:</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true"></a>        <span class="pp">#</span><span class="er">Calculer l&#39;intersection entre le rayon et des triangles de la scène </span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true"></a>        <span class="cf">if</span> le rayon intersect un matériel de type Diffuse:</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true"></a>          <span class="pp">#</span><span class="er">Ajouter un photon à la carte de photon</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true"></a>        <span class="cf">if</span> k &gt; <span class="dv">0</span>:</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true"></a>          <span class="cf">if</span> le test de propabilité de Russian Roulette est réussit:</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true"></a>            <span class="pp">#</span><span class="er">Terminer algo</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true"></a>        <span class="pp">#</span><span class="er">Calculer le rayon de réflexion suivant</span></span></code></pre></div>
+<p><strong>Échantionnage un rayon de lumière</strong></p>
+<p>Pour cette étape, on va choisir aléatoirement un source de la lumière dans la scène, un point de la surface de cette source et une direction. Ensuite, on va calculer l’énergie lumineuse avec l’équation dans la <em>section 1.2.1</em>.</p>
+<p><br /><span class="math display">$$ \phi = \frac{L(x \rightarrow \omega) |cos(\vec{N_x}, \omega)|}{Np(x,\omega)} $$</span><br /></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true"></a><span class="co">// sample initial ray from light and compute initial throughput</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true"></a><span class="at">static</span> Ray sampleRayFromLight(<span class="at">const</span> Scene &amp;scene, Sampler &amp;sampler, Vec3f &amp;throughput) {</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true"></a>    <span class="co">// sample light</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true"></a>    <span class="dt">float</span> light_choose_pdf;</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true"></a>    <span class="ex">boost::</span>shared_ptr&lt;Light&gt; light = scene.sampleLight(sampler,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true"></a>                light_choose_pdf);</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true"></a>    <span class="co">// sample point on light</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true"></a>    <span class="dt">float</span> light_pos_pdf;</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true"></a>    SurfaceInfo light_surf = light-&gt;samplePoint(sampler, light_pos_pdf);</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true"></a>    <span class="co">// sample direction on light</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true"></a>    <span class="dt">float</span> light_dir_pdf;</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true"></a>    Vec3f dir = light-&gt;sampleDirection(light_surf, sampler, light_dir_pdf);</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true"></a></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true"></a>    <span class="co">// spawn ray</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true"></a>    Ray ray(light_surf.position, dir);</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true"></a>    Vec3f le = light-&gt;Le();</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true"></a></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true"></a>    throughput = le / (light_choose_pdf * light_pos_pdf * light_dir_pdf)</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true"></a>                * <span class="bu">std::</span>abs(dot(dir, light_surf.shadingNormal));</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true"></a></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true"></a>    <span class="cf">return</span> ray;</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true"></a>}</span></code></pre></div>
+<p><strong>Le test de propabilité de Russian Roulette</strong></p>
+<p>https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/integrator.hpp#L499C8-L507C44</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true"></a><span class="cf">if</span>(k &gt; <span class="dv">0</span>) {  </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true"></a>  <span class="at">const</span> <span class="dt">float</span> russian_roulette_prob = <span class="bu">std::</span>min(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true"></a>                        <span class="bu">std::</span>max(throughput[<span class="dv">0</span>],</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true"></a>                        <span class="bu">std::</span>max(throughput[<span class="dv">1</span>], throughput[<span class="dv">2</span>])), <span class="fl">1.0</span><span class="bu">f</span>);</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true"></a>  <span class="cf">if</span> (sampler_per_thread.getNext1D() &gt;= russian_roulette_prob) {</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true"></a>    <span class="cf">break</span>;</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true"></a>  }</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true"></a>  throughput /= russian_roulette_prob;</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true"></a>}</span></code></pre></div>
+<p>Il y a un remarque sur cette implémentation de Russian Roulette. C’est que la probabilité de Russian Roulette est toujour égale 1 si l’énergie lumineuse de rayon (throughput) est supérieur de 1. C’est-à-dire que cette partie de Russian Roulette n’influence pas la calcul de lumière jusqu’à le temps où l’énergie lumineuse est très petite (inférieur de 1).</p>
+<p><strong>Calculer le rayon de réflexion suivant</strong></p>
+<p>https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/integrator.hpp#L510C7-L525C49</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true"></a><span class="co">// sample direction by BxDF</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true"></a>Vec3f dir;</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true"></a><span class="dt">float</span> pdf_dir;</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true"></a><span class="at">const</span> Vec3f f = info.hitPrimitive-&gt;sampleBxDF(</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true"></a>    -ray.direction, info.surfaceInfo,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true"></a>        TransportDirection::FROM_LIGHT, sampler_per_thread, dir, pdf_dir);</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true"></a><span class="co">// update throughput and ray</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true"></a><span class="cf">if</span> (!is_captor)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true"></a>    throughput *= f</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true"></a>            * cosTerm(-ray.direction, dir, info.surfaceInfo, TransportDirection::FROM_LIGHT)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true"></a>            / pdf_dir;</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true"></a>ray = Ray(info.surfaceInfo.position, dir);</span></code></pre></div>
+<h2 id="photon-collecting-1">2.6. Photon Collecting</h2>
+<p>Dans cette phase, pour chaque pixel de l’image, on va lancer un rayon qui part de la caméra et calculer le point de contact avec la scène. Ensuite, il faut de chercher un nombre de photons qui sont proche de ce point pour estimer l’énergie lumineuse émise en ce point. Cette valeur de l’énergie lumineuse correspond la couleur du pixel d’image.</p>
+<p><br /><span class="math display">$$ I = \frac{1}{A}\sum_{p_i \in S }\phi_i$$</span><br /></p>
+<p>https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/integrator.hpp#L78C1-L97C3</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true"></a>    <span class="co">// compute reflected radiance with global photon map</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true"></a>    Vec3f computeRadianceWithPhotonMap(<span class="at">const</span> Vec3f &amp;wo,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true"></a>            IntersectInfo &amp;info) <span class="at">const</span> {</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true"></a>        <span class="co">// get nearby photons</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true"></a>        <span class="dt">float</span> max_dist2;</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true"></a>        <span class="at">const</span> <span class="bu">std::</span>vector&lt;<span class="dt">int</span>&gt; photon_indices =</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true"></a>                globalPhotonMap.queryKNearestPhotons(info.surfaceInfo.position,</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true"></a>                        nEstimationGlobal, max_dist2);</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true"></a>        Vec3f Lo;</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true"></a>        <span class="cf">for</span> (<span class="at">const</span> <span class="dt">int</span> photon_idx : photon_indices) {</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true"></a>            <span class="at">const</span> Photon &amp;photon = globalPhotonMap.getIthPhoton(photon_idx);</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true"></a>            <span class="at">const</span> Vec3f f = info.hitPrimitive-&gt;evaluateBxDF(wo, photon.wi,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true"></a>                    info.surfaceInfo, TransportDirection::FROM_CAMERA);</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true"></a>            Lo += f * photon.throughput;</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true"></a>        }</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true"></a>        <span class="cf">if</span> (!photon_indices.empty()) {</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true"></a>            Lo /= (nPhotonsGlobal * PI * max_dist2);</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true"></a>        }</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true"></a>        <span class="cf">return</span> Lo;</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true"></a>    }</span></code></pre></div>
 <h2 id="la-programme-principal">2.7. La programme principal</h2>
+<p>Pour s’adapter au serveur MorphoNet, on exportit tous les codes C++ des parties avant à un bibliothèque Python avec un wrapper Python. Ci-dessous, c’est les codes à construire la simulation d’interception de lumière dans la chambre de culture. (plantglRadScene)</p>
+<p>https://github.com/AurelienBesnier/photon_mapping/blob/main/examples/python/plantgl-rad-scene/planglRadScene.py#L1124C1-L1151C52</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true"></a><span class="pp">#</span><span class="er">ajouter des objets à la scène</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true"></a>materialsR, materialsT = setup_dataset_materials(w)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true"></a>scene.clear()</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true"></a>captor_dict = {}</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true"></a><span class="cf">for</span> sh in sc:</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true"></a>    add_shape(scene, sh, w, materialsR, materialsT)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true"></a>tr2shmap = {}</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true"></a>addCaptors(scene, captor_dict, <span class="st">&quot;captors/captors_expe1.csv&quot;</span>)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true"></a>scene.setupTriangles()</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true"></a></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true"></a><span class="pp">#</span><span class="er">initialiser la scène de Embree</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true"></a>scene.build()</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true"></a></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true"></a><span class="pp">#</span><span class="er">initialiser le photon mapping</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true"></a></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true"></a>print(<span class="st">&quot;Building photonMap...&quot;</span>)</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true"></a>integrator = PhotonMapping(</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true"></a>    n_photons,</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true"></a>    n_estimation_global,</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true"></a>    n_photons_caustics_multiplier,</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true"></a>    n_estimation_caustics,</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true"></a>    final_gathering_depth,</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true"></a>    max_depth,</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true"></a>)</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true"></a></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true"></a><span class="pp">#</span><span class="er">construire la carte de photon</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true"></a></span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true"></a>sampler = UniformSampler(random.randint(<span class="dv">1</span>, sys.maxsize))</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true"></a>integrator.build(scene, sampler, False)</span></code></pre></div>
 <h1 id="reférences">Reférences</h1>
 <ul>
 <li>[1] Bernard Péroche, Dominique Bechmann. Informatique garaphique et rendu. Lavoisier, 2007.</li>

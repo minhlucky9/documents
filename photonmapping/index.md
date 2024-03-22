@@ -361,7 +361,7 @@ Dans un moteur de rendu, il existe plusieurs types de sources de la lumière qui
 * La direction de la lumière
 * L'énergie lumineuse de ce rayon
 
-Ci-dessous, c'est l'implémentation de lumière en général. Il va contenir une variable pour stocker l'énergie totale de cette source, des fonctions pour générer le point de départ ainsi que la direction de rayon.  
+Ci-dessous, c'est l'implémentation de lumière en général. Il va contenir une variable pour stocker l'énergie totale de cette source en Watt, des fonctions pour générer le point de départ ainsi que la direction de rayon.  
 
 https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/light.hpp#L23C1-L37C3
 
@@ -390,28 +390,30 @@ Dans cette simulation, on a déjà implémenté 4 types de lumières corresponda
 * Tube Light
 * Area Light
 
-### 2.2.1. Point light
-
-### 2.2.2. Spot light
-
-### 2.2.3. Tube light
-
-### 2.2.4. Area light
-
 ## 2.3. Scène
 
+La classe de la scène est la classe qui faire des liens entre tous les données de géometries, de matériaux et de lumière pour créer une simulation. 
+
 https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L151C1-L166C80
+
+Les tableaux qui contiennent les données de géometries.
 
 ```cpp
   std::vector<float> vertices;   ///< The vertices of the scene.
   std::vector<uint32_t> indices; ///< The indices of the scene.
   std::vector<float> normals;    ///< The normals of the scene.
+  std::vector<Triangle> triangles; ///< The triangles of the scene per face.
+```
+Le tableau qui contiennent les données de matériaux.
 
+```cpp
   std::vector<boost::optional<tinyobj::material_t>>
       materials; ///< The materials of the scene.
+```
 
-  std::vector<Triangle> triangles; ///< The triangles of the scene per face.
+Les tableaux qui contiennent les données de lumière ainsi le BxDF pour chaque triangle.
 
+```cpp
   std::vector<boost::shared_ptr<BxDF>>
       bxdfs; ///< The bxdfs of the scene per face.
 
@@ -420,6 +422,10 @@ https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scen
 
   std::vector<Primitive> primitives; ///< The primitives of the scene per face.
 ```
+
+### 2.3.1. Ajouter de la lumière dans la scène
+
+Ci-dessous, c'est la fonction d'ajouter un source de lumière dans la scène. Cependant, les variables *newVertices* et *newIndices* répresentent la forme de géometrie de source (un point, un cylinder, etc). L'intensité et la couleur répresentent l'énergie lumineuse en Watts et le longueur d'onde de la lumière.
 
 https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L380C3-L426C4
 
@@ -473,6 +479,8 @@ https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scen
   }
 ```
 
+Après d'ajouter des sources de lumière par cette fonction, il faut d'appeler la fonction setupTriangles() pour qu'il puisse générer des *AreaLights* de ces sources. Chaque *AreaLight* va correspondre à un des triangles qui répresentent la forme de source de la lumière. D'autre part, cette fonction va stocker aussi les addresses des triangles, des lumières ainsi que des BXDF dans un dictionnaire, le tableau *primitives*. Cela va faciliter la recherche des données utilisées pour calculer la réflexion de la lumière dans les phases suivant.   
+
 https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L335C1-L368C4
 
 ```cpp
@@ -512,6 +520,149 @@ https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scen
   }
 ```
 
+### 2.3.2. Ajouter des autres objets dans la scène
+
+Voici la fonction d'ajouter les autres objets que la lumière à la scène. Cependant, les variables *vertices* et *indices* sont répresenté la géometrie.  
+
+```cpp
+void addFaceInfosMat(std::vector<float> vertices,
+                       std::vector<uint32_t> indices,
+                       std::vector<float> normals, Material mat) {
+    for (uint32_t &i : indices) {
+      i += nVertices();
+    }
+    this->vertices.insert(std::end(this->vertices), std::begin(vertices),
+                          std::end(vertices));
+    this->indices.insert(std::end(this->indices), std::begin(indices),
+                         std::end(indices));
+    this->normals.insert(std::end(this->normals), std::begin(normals),
+                         std::end(normals));
+
+    // populate materials
+    for (size_t faceID = nFaces() - (indices.size() / 3); faceID < nFaces();
+         ++faceID) {
+      tinyobj::material_t m;
+
+      m.diffuse[0] = mat.diffuse[0];
+      m.diffuse[1] = mat.diffuse[1];
+      m.diffuse[2] = mat.diffuse[2];
+      m.ambient[0] = mat.ambient[0];
+      m.ambient[1] = mat.ambient[1];
+      m.ambient[2] = mat.ambient[2];
+      m.emission[0] = 0.00;
+      m.emission[1] = 0.00;
+      m.emission[2] = 0.00;
+      m.specular[0] = mat.specular[0];
+      m.specular[1] = mat.specular[1];
+      m.specular[2] = mat.specular[2];
+      m.shininess = mat.shininess;
+      m.dissolve = 1.0f - mat.transparency;
+      m.ior = mat.ior;
+      if (mat.transparency > 0)
+        m.illum = 7;
+      else
+        m.illum = mat.illum;
+      this->materials.emplace_back(m);
+      // populate BxDF
+      const auto material = this->materials[faceID];
+      if (material) {
+        tinyobj::material_t m = material.value();
+        this->bxdfs.push_back(
+            createBxDF(m, mat.reflectance, mat.transmittance, mat.roughness));
+      }
+      // default material
+      else {
+        this->bxdfs.push_back(createDefaultBxDF());
+      }
+    }
+  }
+```
+
+Dans ce code, après de stocker tous les vertices et triangles ainsi que le matériel dans la scène, on va générer un BxDF pour chaque triangle du maillage. Cela va nous aider à calculer la réflexion sur chaque triangle plus facile.
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L32C1-L66C2
+
+```cpp
+boost::shared_ptr<BxDF> createBxDF(tinyobj::material_t &material,
+                                   float reflectance = 0.0f,
+                                   float transmittance = 0.0f,
+                                   float roughness = 0.5f) {
+  const Vec3f kd =
+      Vec3f(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
+  const Vec3f ks =
+      Vec3f(material.specular[0], material.specular[1], material.specular[2]);
+
+  if (material.illum == 2 && (ks == Vec3fZero)) {
+    material.illum = 1;
+  }
+
+  switch (material.illum) {
+  case 2:
+    return boost::make_shared<Mirror>(ks);
+  case 5:
+    // mirror
+    return boost::make_shared<Mirror>(Vec3f(1.0f));
+  case 6:
+    // leaf
+    material.ior = 1.425f; // Source:
+    // https://opg.optica.org/ao/abstract.cfm?uri=ao-13-1-109
+    return boost::make_shared<Leaf>(kd, material.ior, roughness);
+  case 7:
+    // Transparent
+    return boost::make_shared<Transparent>(kd, material.ior);
+  case 9:
+    return boost::make_shared<Refltr>(kd, reflectance, transmittance,
+                                      roughness);
+  default:
+    // lambert
+    return boost::make_shared<Lambert>(kd);
+  }
+}
+```
+
+### 2.3.3. Calculer d'intersection
+
+Afin de calculer l'intersection entre un rayon et tous les triangles dans la scène, on utilise la bibliothèque de Embree. En effet, d'abord, on construire un scène de Embree avec tous les tableux des données de géometrie et de matériel. Ensuite, on utilise la fonction *rtcIntersect1* de Embree pour obtenir la résultat de l'intersection. 
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L687C3-L721C4
+
+```cpp
+void build() {
+#ifdef __OUTPUT__
+    std::cout << "[Scene] building scene..." << std::endl;
+#endif
+
+    // setup embree
+    device = rtcNewDevice(nullptr);
+    scene = rtcNewScene(device);
+
+    rtcSetSceneBuildQuality(scene, RTC_BUILD_QUALITY_MEDIUM);
+    rtcSetSceneFlags(scene, RTC_SCENE_FLAG_ROBUST);
+
+    RTCGeometry geom = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
+
+    // set vertices
+    float *vb = (float *)rtcSetNewGeometryBuffer(
+        geom, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, 3 * sizeof(float),
+        nVertices());
+    for (size_t i = 0; i < vertices.size(); ++i) {
+      vb[i] = vertices[i];
+    }
+
+    // set indices
+    uint32_t *ib = (uint32_t *)rtcSetNewGeometryBuffer(
+        geom, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, 3 * sizeof(uint32_t),
+        nFaces());
+    for (size_t i = 0; i < indices.size(); ++i) {
+      ib[i] = indices[i];
+    }
+
+    rtcCommitGeometry(geom);
+    rtcAttachGeometry(scene, geom);
+    rtcReleaseGeometry(geom);
+    rtcCommitScene(scene);
+  }
+```
 
 https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scene.hpp#L730C1-L777C4
 
@@ -568,22 +719,47 @@ https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/scen
 
 ## 2.4. Carte de Photon
 
+Dans la carte de photon, chaque photon contiens l'énergie lumineuse en Watts, la position de photon, la direction de la lumière vers la surface et l'index du triangle contenant le photon. 
+
 https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/photon_map.hpp#L15
 
 ```cpp
 struct Photon {
-    Vec3f throughput;  ///< BxDF * Geometric Term / pdf
+    Vec3f throughput;  ///< BxDF * Cos Term / pdf
     Vec3f position; ///< The position of the photon in the scene
     Vec3f wi;  ///<  incident direction
     unsigned int triId = 0; ///<  id of the triangle on which the photon ended up
 };
 ```
 
-KDTree
+La carte de photon peut être stocker sous la forme d'un KdTree ou un tableau.
 
 ## 2.5. Photon Tracing
 
-échantionnage un rayon de lumière
+Le pseudocode de la phase de Photon Tracing:
+
+```cpp
+  nb_sample = 10000000;
+  maxDepth = 100;
+
+  for l: 0 -> nb_light:
+    for s: 0 -> nb_sample/nb_light:
+      #Échantionner un rayon de lumière
+      for k: 0 -> maxDepth:
+        #Calculer l'intersection entre le rayon et des triangles de la scène 
+        if le rayon intersect un matériel de type Diffuse:
+          #Ajouter un photon à la carte de photon
+        if k > 0:
+          if le test de propabilité de Russian Roulette est réussit:
+            #Terminer algo
+        #Calculer le rayon de réflexion suivant
+```
+
+**Échantionnage un rayon de lumière**
+
+Pour cette étape, on va choisir aléatoirement un source de la lumière dans la scène, un point de la surface de cette source et une direction. Ensuite, on va calculer l'énergie lumineuse avec l'équation dans la *section 1.2.1*. 
+
+$$ \phi = \frac{L(x \rightarrow \omega) |cos(\vec{N_x}, \omega)|}{Np(x,\omega)} $$
 
 ```cpp
 // sample initial ray from light and compute initial throughput
@@ -612,9 +788,49 @@ static Ray sampleRayFromLight(const Scene &scene, Sampler &sampler, Vec3f &throu
 }
 ```
 
+**Le test de propabilité de Russian Roulette**
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/integrator.hpp#L499C8-L507C44
+
+```cpp
+if(k > 0) {  
+  const float russian_roulette_prob = std::min(
+  					    std::max(throughput[0],
+  					    std::max(throughput[1], throughput[2])), 1.0f);
+  if (sampler_per_thread.getNext1D() >= russian_roulette_prob) {
+  	break;
+  }
+  throughput /= russian_roulette_prob;
+}
+```
+Il y a un remarque sur cette implémentation de Russian Roulette. C'est que la probabilité de Russian Roulette est toujour égale 1 si l'énergie lumineuse de rayon (throughput) est supérieur de 1. C'est-à-dire que cette partie de Russian Roulette n'influence pas la calcul de lumière jusqu'à le temps où l'énergie lumineuse est très petite (inférieur de 1).
+
+**Calculer le rayon de réflexion suivant**
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/integrator.hpp#L510C7-L525C49
+
+```cpp
+// sample direction by BxDF
+Vec3f dir;
+float pdf_dir;
+const Vec3f f = info.hitPrimitive->sampleBxDF(
+    -ray.direction, info.surfaceInfo,
+		TransportDirection::FROM_LIGHT, sampler_per_thread, dir, pdf_dir);
+// update throughput and ray
+if (!is_captor)
+	throughput *= f
+			* cosTerm(-ray.direction, dir, info.surfaceInfo, TransportDirection::FROM_LIGHT)
+			/ pdf_dir;
+ray = Ray(info.surfaceInfo.position, dir);
+```
+
 ## 2.6. Photon Collecting
 
-calculer le radiance une region
+Dans cette phase, pour chaque pixel de l'image, on va lancer un rayon qui part de la caméra et calculer le point de contact avec la scène. Ensuite, il faut de chercher un nombre de photons qui sont proche de ce point pour estimer l'énergie lumineuse émise en ce point. Cette valeur de l'énergie lumineuse correspond la couleur du pixel d'image.
+
+$$ I = \frac{1}{A}\sum_{p_i \in S }\phi_i$$
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/integrator.hpp#L78C1-L97C3
 
 ```cpp
 	// compute reflected radiance with global photon map
@@ -640,7 +856,47 @@ calculer le radiance une region
 	}
 ```
 
+
+
 ## 2.7. La programme principal
+
+Pour s'adapter au serveur MorphoNet, on exportit tous les codes C++ des parties avant à un bibliothèque Python avec un wrapper Python. Ci-dessous, c'est les codes à construire la simulation d'interception de lumière dans la chambre de culture. (plantglRadScene)
+
+https://github.com/AurelienBesnier/photon_mapping/blob/main/examples/python/plantgl-rad-scene/planglRadScene.py#L1124C1-L1151C52
+
+```cpp
+#ajouter des objets à la scène
+
+materialsR, materialsT = setup_dataset_materials(w)
+scene.clear()
+captor_dict = {}
+for sh in sc:
+    add_shape(scene, sh, w, materialsR, materialsT)
+tr2shmap = {}
+addCaptors(scene, captor_dict, "captors/captors_expe1.csv")
+scene.setupTriangles()
+
+#initialiser la scène de Embree
+
+scene.build()
+
+#initialiser le photon mapping
+
+print("Building photonMap...")
+integrator = PhotonMapping(
+    n_photons,
+    n_estimation_global,
+    n_photons_caustics_multiplier,
+    n_estimation_caustics,
+    final_gathering_depth,
+    max_depth,
+)
+
+#construire la carte de photon
+
+sampler = UniformSampler(random.randint(1, sys.maxsize))
+integrator.build(scene, sampler, False)
+```
 
 # Reférences
 * [1] Bernard Péroche, Dominique Bechmann. Informatique garaphique et rendu. Lavoisier, 2007.
