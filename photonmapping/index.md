@@ -213,6 +213,8 @@ Dans notre projet, on utilise 4 types de matériels pour construire l'environnem
 
 Le matériel de Lambert est un type de matériel très basique dans notre projet. Il est utilisé pour répresetner la plupart des objets dans la scène tels ques les murs ou la table. 
 
+$$f_r(\omega_i,\omega_r) = \frac{C}{\pi}$$
+
 https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/material.hpp#L123
 
 ```cpp
@@ -246,6 +248,8 @@ public:
 ```
 
 La densité de probabilité (pdf) dans *la partie 1.2.1* est calculer par ce code:
+
+$$p(\omega) = \frac{|cos(\vec{N}, \omega)|}{\pi}$$
 
 https://github.com/AurelienBesnier/photon_mapping/blob/main/src/cpp/include/sampler.hpp#L103
 
