@@ -74,6 +74,76 @@ $$f_r(\omega_i,\omega_r) = \frac{C}{\pi}$$
 avec:\
 $C$ est le longueur d'onde de la lumière 
 
+#### 1.1.2.3. Le modèle de Phong
+
+<p style="text-align: center">
+  <img src="images/Blinn_Vectors.svg.png" width=400 style="display:block; margin: auto; background: white">
+  <br>
+  Figure 4: Les vecteurs utilisé dans le modèle de Phong
+</p>
+
+Le modèle de Phong est le modèle le plus utilisé en synthèse d'image. Ce modèle est basé sur la combinaison linéaire d'un comportement diffus et d'un comportement directionnelle. La BRDF est représenté par cette formule:
+
+$$f(\vec{L}, \vec{V}) = k_d + k_s \frac{ F_s(\vec{L}, \vec{V})}{(\vec{N}.\vec{L})}$$
+
+avec:
+* $\vec{L}$ est la direction à la lumière
+* $\vec{V}$ est la direction de reflexion
+* $\vec{N}$ est la normale de surface
+* $k_d$ est la couleur diffuse de l'objet
+* $k_s$ est la couleur spéculaire de l'objet
+
+Le terme $F_s(\vec{L}, \vec{V})$ est appelé lobe spéculaire. Il peut être exprimée de plusieurs manières. Originalement, Phong avait proposé l'expression suivant:
+
+$$F_s^P(\vec{L}, \vec{V}) =  \{ \begin{array}{rcl}
+  (\vec{R}.\vec{V})^n & si \vec{R}.\vec{V} > 0  \\ 0 & sinon 
+  \end{array}  $$
+
+avec:
+* $\vec{V}$ est la direction de réflexion en réelle
+* $\vec{R}$ est la direction de réflexion définie par la première loi de Descarte; et exprimée par: $\vec{R} = 2(\vec{L}.\vec{N})\vec{N} - \vec{L}$
+* $n$ est la rugosité de la surface. Plus n est grand, plus la surface apparaît lisse.
+
+Dans la première loi de Descartes, quand un rayon de lumière $\vec{L}$ contacte un surface, il va génère un rayon de réflexion $\vec{R_1}$ et un rayon de réfraction $\vec{R_2}$. Les relation entre ces rayons sont répresenté par ces équations:
+
+$$i_1 = i_1'$$
+$$n_1 Sin(i_1) = n_2 Sin (i_2)$$
+
+avec:
+* $i_1$ est l'angle entre le rayon entré et la normale
+* $i_1'$ est l'angle entre le rayon de réflexion et la normale
+* $i_2$ est l'angle entre le rayon de réfraction et la normale
+* $n_1$ est l'indice de réfraction de milieu 1
+* $n_2$ est l'indice de réfraction de milieu 2
+
+<p style="text-align: center">
+  <img src="images/decartes.png" width=400 style="display:block; margin: auto; background: white">
+  <br>
+  Figure 5: La première loi de Dsecartes
+</p>
+
+L'indice de réfraction est la ratio entre la vitesse de la lumière dans la vide et dans un milieu considèré. Il est exprimée par cette formule:
+
+$$n = \frac{c}{v}$$
+
+avec:
+* $c$ est la vitesse de la lumière dans le vide, environ $3.10⁸ m.s^{-1}$
+* $v$ est la vitesse de la lumière dans le milieu considèré
+
+**Modèle Blinn-Phong**
+
+À côté de l'expression du terme spéculaire proposé par Phong, il existe aussi une autre expression de ce terme. Ci-dessous, c'est la formule proposé par Blinn:
+
+$$ F_s^B(\vec{L}, \vec{V}) = (\vec{N}.\vec{H})^n $$
+
+avec:
+* $\vec{H}$ est le vector à mi-distance entre $\vec{V}$ et $\vec{L}$
+
+
+#### 1.1.2.4. Le modèle de Cook-Torrance
+
+#### 1.1.2.5. le modèle de Lafortune
+
 #### 1.1.2.3. Les autres fonctions de BxDF
 
 À côté de la fonction BRDF, il existe aussi des autres fonctions qui s'adaptent aux différents type de matériaux, tels ques:
@@ -125,7 +195,7 @@ Le Photon Mapping est la méthode utilisé beaucoup dans les simulations d'inter
 <p style="text-align: center">
   <img src="images/photon_tracing.png" width=400 style="display:block; margin: auto;">
   <br>
-  Figure 4: La phase de Photon Tracing
+  Figure 6: La phase de Photon Tracing
 </p>
 
 Afin de cosntruire la carte de photon, on va lancer plusieurs rayons à partir des sources de lumières et stocker des impacts de chaque rélfexions, ainsi que leurs énergie $\phi$ en Watts (W). Ces impacts sont les *photons* dans notre carte de photon. Si l'émission de N échantillons est guidée par la densité de probabilité $p(x, \omega)$, l'énergie de chaque photon est calculer par cette équation:
@@ -152,7 +222,7 @@ Ci-dessous, ce sont des valeurs de PDF qui corresponds quelques cas d'échantill
 <p style="text-align: center">
   <img src="images/photon_colect.gif" width=400 style="display:block; margin: auto;">
   <br>
-  Figure 5: La phase de Photon Collecting
+  Figure 7: La phase de Photon Collecting
 </p>
 
 Après d'obtenir la carte de photon, on va l'utiliser pour faire le rendu d'image. Pour chaque pixel d'image, on va lancer un rayon à partir de caméra, puis calculer le point d'intersection *x* entre ce rayon et tous les objets dans la scène. Si S est la surface qui contiens *x* et $p_i$ est la position du $i^{me}$ photon d'énergie $\phi_i$, l'énergie reçue en Watts est: 
@@ -356,7 +426,7 @@ L'article concernant l'ior de feuil: https://opg.optica.org/ao/abstract.cfm?uri=
 <p style="text-align: center">
   <img src="images/lumière.png" style="display:block; margin: auto;">
   <br>
-  Figure 6: Des types de source de la lumière
+  Figure 8: Des types de source de la lumière
 </p>
 
 Dans un moteur de rendu, il existe plusieurs types de sources de la lumière qui va nous donner des résultats différents de rendu en appliquant dans la scène. Afin de simuler ces types de lumière, on va échantillonner des rayons de lumière qui partent de ces sources. Chaque rayon de lumière peut être répresenté par ces facteurs:
@@ -906,3 +976,4 @@ integrator.build(scene, sampler, False)
 * [1] Bernard Péroche, Dominique Bechmann. Informatique garaphique et rendu. Lavoisier, 2007.
 * [2] Schill, Steven & Jensen, John & Raber, George & Porter, Dwayne. (2004). Temporal Modeling of Bidirectional Reflection Distribution Function (BRDF) in Coastal Vegetation. GIScience & Remote Sensing. 41. 116-135. 10.2747/1548-1603.41.2.116. 
 * [3] https://opg.optica.org/ao/abstract.cfm?uri=ao-13-1-109
+* [4] Lewis, Robert. (2001). Making Shaders More Physically Plausible. Computer Graphics Forum. 13. 10.1111/1467-8659.1320109. 
