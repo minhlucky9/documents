@@ -95,9 +95,9 @@ avec:
 
 Le terme $F_s(\vec{L}, \vec{V})$ est appelé lobe spéculaire. Il peut être exprimée de plusieurs manières. Originalement, Phong avait proposé l'expression suivant:
 
-$$F_s^P(\vec{L}, \vec{V}) =  \{ \begin{array}{rcl}
+$$F_s^P(\vec{L}, \vec{V}) =  \left\{ \begin{array}{rcl}
   (\vec{R}.\vec{V})^n & si \vec{R}.\vec{V} > 0  \\ 0 & sinon 
-  \end{array}  $$
+  \end{array} \right.  $$
 
 avec:
 * $\vec{V}$ est la direction de réflexion en réelle
@@ -130,6 +130,18 @@ avec:
 * $c$ est la vitesse de la lumière dans le vide, environ $3.10⁸ m.s^{-1}$
 * $v$ est la vitesse de la lumière dans le milieu considèré
 
+**Physiquement plausible**
+
+Malgré que le modèle original de Phong est utilisé dans beaucoup de système de rendu, ce modèle n'adapte pas les facteurs physiques suivant: 
+* La conservation d'énergie: BRDF $ \le$ 1
+* La réciprocité: $f(\vec{L}, \vec{V}) = f(\vec{V}, \vec{L})$
+
+Afin de rendre le modèle de Phong physiquement plausible, en 1993, Lewis nous a proposé ensemble de constraintes sur les paramètres permettant de respecter la conservation d'énergie. 
+
+$$k_d + k_s \le 1$$ 
+
+Le problème de la réciprocité peut être résoudre par utiliser le terme spéculaire proposé par Blinn. 
+
 **Modèle Blinn-Phong**
 
 À côté de l'expression du terme spéculaire proposé par Phong, il existe aussi une autre expression de ce terme. Ci-dessous, c'est la formule proposé par Blinn:
@@ -139,12 +151,30 @@ $$ F_s^B(\vec{L}, \vec{V}) = (\vec{N}.\vec{H})^n $$
 avec:
 * $\vec{H}$ est le vector à mi-distance entre $\vec{V}$ et $\vec{L}$
 
+#### 1.1.2.3. L'équation de Fresnel
 
-#### 1.1.2.4. Le modèle de Cook-Torrance
+L'équation de Fresnel est une équation utilisé pour calculer l'énergie de réflexion et l'énergie de réfraction au cas où la lumière contacte un matériel transparent tels que la verre ou l'eau. La lumière est composée de deux ondes perpendiculaires que nous appelons la lumière polarisée parallèle et perpendiculaire. On a deux équation de Fresnel:
 
-#### 1.1.2.5. le modèle de Lafortune
+$$ F_{R\parallel} = \left(\frac{n_2 Cos \theta_1 - n_1 Cos \theta_2 }{ n_2 Cos \theta_1 + n_1 Cos \theta_2 } \right)²  $$
 
-#### 1.1.2.3. Les autres fonctions de BxDF
+$$ F_{R\perp} = \left(\frac{n_2 Cos \theta_2 - n_1 Cos \theta_1 }{ n_2 Cos \theta_2 + n_1 Cos \theta_1 } \right)²  $$
+
+avec:
+* $\theta_1$ est l'angle entre le rayon d'éclairement et la normale
+* $\theta_2$ est l'angle entre le rayon de réflexion et la normale
+* $n_1$ est l'indice de réfraction de milieu 1
+* $n_2$ est l'indice de réfraction de milieu 2
+
+Par calculer le moyenne de ces deux valeurs, on obtiens le ratio entre l'énergie de réflexion et l'énergie d'émise:
+
+$$ F_R = \frac{1}{2} (F_{ R\parallel} + F_{R\perp} ) $$
+
+Grâce à la conservation d'énergie, on peut calculer le ratio entre l'énergie de réfraction et l'énergie d'émise:
+
+$$F_T = 1 - F_R$$
+
+
+#### 1.1.2.4. Les autres fonctions de BxDF
 
 À côté de la fonction BRDF, il existe aussi des autres fonctions qui s'adaptent aux différents type de matériaux, tels ques:
 
@@ -386,7 +416,9 @@ public:
             wi = reflect(wo, n);
             pdf = 1.0f;
 
-            //bxdf = 1/(PI * pdf) = 1 / cosTheta
+            //bxdf = rho / PI
+            //pdf = cosTheta / PI
+            //===> bxdf / pdf = rho / cosTheta
             return rho / absCosTheta(wi);
         }
             // refraction
