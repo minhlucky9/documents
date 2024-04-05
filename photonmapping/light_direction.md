@@ -190,7 +190,7 @@ Le BRDF de matériel Lambert est devenu 0 si la couleur de matériel est noir, a
   Figure 4: Les objets noirs dans la scène
 </p>
 
-Dans cette implémentation, il existe un autre cas où le BRDF deviens 0, c'est le cosine de l'angle $\theta_i$ et $\theta_o$ sont inférieur 0, autrement dit, la direction situe au dessous de la surface XOY. Il n'existe pas ce cas car tous de nos directions unité sont situé dans le hemisphere supérieur.
+Dans cette implémentation, il existe un autre cas où le BRDF deviens 0, c'est le cosine de l'angle $\theta_i$ et $\theta_o$ sont inférieur 0, autrement dit, la direction situe au dessous de la surface XOY. **C'est la raison pour laquelle notre BRDF est devenu 0 très rapidement**. Pourtant, en théorie, il n'existe pas ce cas car tous de nos directions unité sont situé dans le hemisphere supérieur.
 
 <p style="text-align: center">
   <img src="images/demisphere.png" width=400  style="display:block; margin: auto">
@@ -319,4 +319,4 @@ Voici les résultats.
 
 On peut voir que les résultats sont très bien. Pourtant, dans notre simulation, à côté de la lumière, il y a beaucoup d'objets qui a la forme d'un carré et cela influence aussi à la simulation.
 
-Dans la semaine prochaine, je vais essayer à corriger ces erreurs pour voir si le résultat de simulation est amélioré.
+**Dans la semaine prochaine, je vais essayer à corriger ces erreurs pour voir si le résultat de simulation est amélioré.**

@@ -250,7 +250,7 @@ window.Quarto = {
 <p style="text-align: center">
 <img src="images/noir_objet.png" width="800" style="display:block; margin: auto"> <br> Figure 4: Les objets noirs dans la scène
 </p>
-<p>Dans cette implémentation, il existe un autre cas où le BRDF deviens 0, c’est le cosine de l’angle <span class="math inline">\(\theta_i\)</span> et <span class="math inline">\(\theta_o\)</span> sont inférieur 0, autrement dit, la direction situe au dessous de la surface XOY. Il n’existe pas ce cas car tous de nos directions unité sont situé dans le hemisphere supérieur.</p>
+<p>Dans cette implémentation, il existe un autre cas où le BRDF deviens 0, c’est le cosine de l’angle <span class="math inline">\(\theta_i\)</span> et <span class="math inline">\(\theta_o\)</span> sont inférieur 0, autrement dit, la direction situe au dessous de la surface XOY. <strong>C’est la raison pour laquelle notre BRDF est devenu 0 très rapidement</strong>. Pourtant, en théorie, il n’existe pas ce cas car tous de nos directions unité sont situé dans le hemisphere supérieur.</p>
 <p style="text-align: center">
 <img src="images/demisphere.png" width="400" style="display:block; margin: auto"> <br> Figure 5: les directions du hemisphere supérieur
 </p>
@@ -335,7 +335,7 @@ window.Quarto = {
 <img src="images/res_test_vector_2.png" width="800" style="display:block; margin: auto"> <br> Figure 10: Resultat avec des bonnes triangles
 </p>
 <p>On peut voir que les résultats sont très bien. Pourtant, dans notre simulation, à côté de la lumière, il y a beaucoup d’objets qui a la forme d’un carré et cela influence aussi à la simulation.</p>
-<p>Dans la semaine prochaine, je vais essayer à corriger ces erreurs pour voir si le résultat de simulation est amélioré.</p>
+<p><strong>Dans la semaine prochaine, je vais essayer à corriger ces erreurs pour voir si le résultat de simulation est amélioré.</strong></p>
 </section>
 
 </main>
