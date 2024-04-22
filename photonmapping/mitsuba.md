@@ -14,7 +14,7 @@ Dans la deuxième version, le plus important changement est de faire Mitsuba dev
 
 * Faire le rendu d'image sur CPU comme la première version
 * Supporter le SIMD de CPU modern pour échantillonner des rayons de lumière en parallel
-* Devenir un moteur de rendu différenciable qui fonctionne sur NDIVIA RTX GPUs. Un algorithme de rendu différenciable est un algorithme basé sur Machine Learning, il va transformer des paramètres la scène tels ques: la position de caméra, geopetrie, BRDF, etc à une image (3D à 2D) et faire l'inverse (2D à 3D).
+* Devenir un moteur de rendu différenciable qui fonctionne sur NDIVIA RTX GPUs. Un algorithme de rendu différenciable est un algorithme basé sur Machine Learning, il va transformer des paramètres la scène tels ques: la position de caméra, geometrie, BRDF, etc à une image (3D à 2D) et faire l'inverse (2D à 3D).
 
 D'autre part, Mitsuba 2 utilise la bibliothèque *pybind11* pour transformer des fonctions C++ en Python pour qu'on peut utiliser ces fonctions et visualiser le résultat sur Jupyter Notebook.
 
@@ -69,5 +69,5 @@ L'algorithme Photon Mapping est implémenté seulement sur la version **Mitsuba 
 
 Dans la prémier version, il nous donne une fonction pour appliquer le photon mapping pour faire le rendu d'image. Alors, si on voudrais accèder au photon map ou compter des photons, il faut de modifier le source code de la bibliothque en C++. Cette tache n'est pas facile car le source code est vraiment très compliqué.
 
-D'autre part, dans la prémier version, toutes les taches de lancer des rayons sont marché sur CPU, alors la performance n'est pas très intéressant. 
+D'autre part, dans la prémier version, toutes les taches de lancer des rayons sont marché sur CPU, alors la performance n'est pas très intéressant par rapport notre version courante. 
 
