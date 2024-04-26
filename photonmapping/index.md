@@ -96,7 +96,7 @@ avec:
 Le terme $F_s(\vec{L}, \vec{V})$ est appelé lobe spéculaire. Il peut être exprimée de plusieurs manières. Originalement, Phong avait proposé l'expression suivant:
 
 $$F_s^P(\vec{L}, \vec{V}) =  \left\{ \begin{array}{rcl}
-  (\vec{R}.\vec{V})^n & si \vec{R}.\vec{V} > 0  \\ 0 & sinon 
+  (\vec{R}.\vec{V})^n & si \quad \vec{R}.\vec{V} > 0  \\ 0 & sinon 
   \end{array} \right.  $$
 
 avec:
